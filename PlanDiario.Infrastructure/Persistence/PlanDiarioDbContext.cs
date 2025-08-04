@@ -38,7 +38,7 @@ namespace PlanDiario.Infrastructure.Persistence
                 entity.Property(e => e.DNI).IsRequired().HasMaxLength(20);
                 entity.Property(e => e.Name).IsRequired().HasMaxLength(100);
                 entity.Property(e => e.LastName).IsRequired().HasMaxLength(100);
-                entity.HasOne(e => e.Locality).WithMany().HasForeignKey(e => e.LocalityId).OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne(e => e.Locality).WithMany(c => c.Customers).HasForeignKey(e => e.LocalityId).OnDelete(DeleteBehavior.Restrict);
                 entity.HasOne(e => e.Collector).WithMany(c => c.Customers).HasForeignKey(e => e.CollectorId).OnDelete(DeleteBehavior.Restrict);
                 entity.HasOne(e => e.Salesman).WithMany(s => s.Customers).HasForeignKey(e => e.SalesmanId).OnDelete(DeleteBehavior.Restrict);
                 entity.HasIndex(e => e.DNI).IsUnique();
@@ -642,7 +642,7 @@ namespace PlanDiario.Infrastructure.Persistence
                       Phone2 = string.Empty,
                       Phone3 = string.Empty,
                       Email = "maria.perez@gmail.com",
-                      LocalityId = 1,   // ← adjust to an existing Locality
+                      LocalityId = 101,   // ← adjust to an existing Locality
                       CollectorId = 1,   // ← adjust to an existing Collector
                       SalesmanId = 1    // ← adjust to an existing Salesman
                   },
@@ -658,7 +658,7 @@ namespace PlanDiario.Infrastructure.Persistence
                       Phone2 = "2615550457",
                       Phone3 = string.Empty,
                       Email = "juan.gomez@gmail.com",
-                      LocalityId = 2,
+                      LocalityId = 102,
                       CollectorId = 1,
                       SalesmanId = 2
                   },
@@ -674,7 +674,7 @@ namespace PlanDiario.Infrastructure.Persistence
                       Phone2 = string.Empty,
                       Phone3 = string.Empty,
                       Email = "carla.lopez@gmail.com",
-                      LocalityId = 3,
+                      LocalityId = 103,
                       CollectorId = 2,
                       SalesmanId = 1
                   },
@@ -690,7 +690,7 @@ namespace PlanDiario.Infrastructure.Persistence
                       Phone2 = "2635550112",
                       Phone3 = string.Empty,
                       Email = "pedro.martinez@gmail.com",
-                      LocalityId = 4,
+                      LocalityId = 104,
                       CollectorId = 2,
                       SalesmanId = 2
                   },
@@ -706,7 +706,7 @@ namespace PlanDiario.Infrastructure.Persistence
                       Phone2 = string.Empty,
                       Phone3 = string.Empty,
                       Email = "laura.fernandez@gmail.com",
-                      LocalityId = 5,
+                      LocalityId = 105,
                       CollectorId = 1,
                       SalesmanId = 1
                   }
