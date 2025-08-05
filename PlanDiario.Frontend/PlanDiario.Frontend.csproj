@@ -15,4 +15,8 @@
     <ProjectReference Include="..\PlanDiario.Application\PlanDiario.Application.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Shared\" />
+  </ItemGroup>
+
 </Project>
