@@ -1,0 +1,115 @@
+﻿@page "/customers/edit/{Id:guid}"
+@using PlanDiario.Application.DTOs
+@using PlanDiario.Frontend.Services
+@inject ICustomerService CustomerService
+@inject NavigationManager Navigation
+@inject IJSRuntime JSRuntime
+
+<PageTitle>Edit Customer</PageTitle>
+
+@if (loading)
+{
+    <div class="text-center">
+        <div class="spinner-border" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+}
+else if (updateRequest != null)
+{
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3>Edit Customer</h3>
+        <button class="btn btn-secondary" @onclick="GoBack">
+            <i class="fas fa-arrow-left"></i> Back to List
+        </button>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <CustomerEditForm Model="updateRequest" 
+                                    OnValidSubmit="HandleValidSubmit" 
+                                    OnCancel="GoBack"
+                                    IsLoading="isLoading" />
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="alert alert-danger">
+        <i class="fas fa-exclamation-triangle"></i> Customer not found.
+    </div>
+}
+
+@code {
+    [Parameter] public Guid Id { get; set; }
+
+    private UpdateCustomerRequest? updateRequest;
+    private bool loading = true;
+    private bool isLoading = false;
+    private string originalDNI = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var customer = await CustomerService.GetCustomerByIdAsync(Id);
+        if (customer != null)
+        {
+            originalDNI = customer.DNI;
+            updateRequest = new UpdateCustomerRequest
+            {
+                Id = customer.Id,
+                DNI = customer.DNI,
+                Name = customer.Name,
+                LastName = customer.LastName,
+                Address1 = customer.Address1,
+                Address2 = customer.Address2,
+                Phone1 = customer.Phone1,
+                Phone2 = customer.Phone2,
+                Phone3 = customer.Phone3,
+                Email = customer.Email,
+                LocalityId = customer.LocalityId,
+                CollectorId = customer.CollectorId,
+                SalesmanId = customer.SalesmanId
+            };
+        }
+        loading = false;
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        if (updateRequest == null) return;
+
+        isLoading = true;
+
+        try
+        {
+            // Check if DNI changed and if new DNI already exists
+            if (updateRequest.DNI != originalDNI)
+            {
+                var dniExists = await CustomerService.CustomerExistsByDNIAsync(updateRequest.DNI);
+                if (dniExists)
+                {
+                    await JSRuntime.InvokeVoidAsync("alert", "A customer with this DNI already exists.");
+                    isLoading = false;
+                    return;
+                }
+            }
+
+            await CustomerService.UpdateCustomerAsync(updateRequest);
+            Navigation.NavigateTo("/customers");
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", $"Error updating customer: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void GoBack() => Navigation.NavigateTo("/customers");
+}

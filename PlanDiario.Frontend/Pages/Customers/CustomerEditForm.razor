@@ -1,0 +1,105 @@
+﻿@using Microsoft.AspNetCore.Components.Forms
+@using PlanDiario.Application.DTOs
+
+<EditForm Model="Model" OnValidSubmit="OnValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary class="text-danger" />
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="mb-3">
+                <label class="form-label">DNI <span class="text-danger">*</span></label>
+                <InputText @bind-Value="Model.DNI" class="form-control" disabled="@IsLoading" />
+                <ValidationMessage For="() => Model.DNI" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Name <span class="text-danger">*</span></label>
+                <InputText @bind-Value="Model.Name" class="form-control" disabled="@IsLoading" />
+                <ValidationMessage For="() => Model.Name" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Last Name <span class="text-danger">*</span></label>
+                <InputText @bind-Value="Model.LastName" class="form-control" disabled="@IsLoading" />
+                <ValidationMessage For="() => Model.LastName" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Email</label>
+                <InputText @bind-Value="Model.Email" type="email" class="form-control" disabled="@IsLoading" />
+                <ValidationMessage For="() => Model.Email" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Phone 1</label>
+                <InputText @bind-Value="Model.Phone1" class="form-control" disabled="@IsLoading" />
+                <ValidationMessage For="() => Model.Phone1" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Phone 2</label>
+                <InputText @bind-Value="Model.Phone2" class="form-control" disabled="@IsLoading" />
+                <ValidationMessage For="() => Model.Phone2" />
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="mb-3">
+                <label class="form-label">Phone 3</label>
+                <InputText @bind-Value="Model.Phone3" class="form-control" disabled="@IsLoading" />
+                <ValidationMessage For="() => Model.Phone3" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Address 1</label>
+                <InputText @bind-Value="Model.Address1" class="form-control" disabled="@IsLoading" />
+                <ValidationMessage For="() => Model.Address1" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Address 2</label>
+                <InputText @bind-Value="Model.Address2" class="form-control" disabled="@IsLoading" />
+                <ValidationMessage For="() => Model.Address2" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Locality <span class="text-danger">*</span></label>
+                <InputNumber @bind-Value="Model.LocalityId" class="form-control" disabled="@IsLoading" />
+                <ValidationMessage For="() => Model.LocalityId" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Collector <span class="text-danger">*</span></label>
+                <InputNumber @bind-Value="Model.CollectorId" class="form-control" disabled="@IsLoading" />
+                <ValidationMessage For="() => Model.CollectorId" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Salesman <span class="text-danger">*</span></label>
+                <InputNumber @bind-Value="Model.SalesmanId" class="form-control" disabled="@IsLoading" />
+                <ValidationMessage For="() => Model.SalesmanId" />
+            </div>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-end gap-2">
+        <button type="button" class="btn btn-secondary" @onclick="OnCancel" disabled="@IsLoading">
+            Cancel
+        </button>
+        <button type="submit" class="btn btn-primary" disabled="@IsLoading">
+            @if (IsLoading)
+            {
+                <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+            }
+            Update Customer
+        </button>
+    </div>
+</EditForm>
+
+@code {
+    [Parameter] public UpdateCustomerRequest Model { get; set; } = new();
+    [Parameter] public EventCallback OnValidSubmit { get; set; }
+    [Parameter] public EventCallback OnCancel { get; set; }
+    [Parameter] public bool IsLoading { get; set; }
+}

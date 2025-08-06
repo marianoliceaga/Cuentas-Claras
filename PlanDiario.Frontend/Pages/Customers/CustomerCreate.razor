@@ -1,0 +1,63 @@
+﻿@page "/customers/create"
+@using PlanDiario.Application.DTOs
+@using PlanDiario.Frontend.Services
+@inject ICustomerService CustomerService
+@inject NavigationManager Navigation
+@inject IJSRuntime JSRuntime
+
+<PageTitle>Create Customer</PageTitle>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3>Create New Customer</h3>
+    <button class="btn btn-secondary" @onclick="GoBack">
+        <i class="fas fa-arrow-left"></i> Back to List
+    </button>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <CustomerCreateForm Model="createRequest" 
+                                  OnValidSubmit="HandleValidSubmit" 
+                                  OnCancel="GoBack"
+                                  IsLoading="isLoading" />
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private CreateCustomerRequest createRequest = new();
+    private bool isLoading = false;
+
+    private async Task HandleValidSubmit()
+    {
+        isLoading = true;
+        
+        try
+        {
+            // Check if DNI already exists
+            var dniExists = await CustomerService.CustomerExistsByDNIAsync(createRequest.DNI);
+            if (dniExists)
+            {
+                await JSRuntime.InvokeVoidAsync("alert", "A customer with this DNI already exists.");
+                isLoading = false;
+                return;
+            }
+
+            await CustomerService.CreateCustomerAsync(createRequest);
+            Navigation.NavigateTo("/customers");
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", $"Error creating customer: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void GoBack() => Navigation.NavigateTo("/customers");
+}

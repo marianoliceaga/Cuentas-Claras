@@ -1,0 +1,22 @@
+﻿namespace PlanDiario.Application.DTOs
+{
+    public class CustomerDto
+    {
+        public Guid Id { get; set; }
+        public string DNI { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+        public string LastName { get; set; } = string.Empty;
+        public string Address1 { get; set; } = string.Empty;
+        public string Address2 { get; set; } = string.Empty;
+        public string Phone1 { get; set; } = string.Empty;
+        public string Phone2 { get; set; } = string.Empty;
+        public string Phone3 { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public int LocalityId { get; set; }
+        public LocalityDto Locality { get; set; } = default!;
+        public int CollectorId { get; set; }
+        public CollectorDto Collector { get; set; } = default!;
+        public int SalesmanId { get; set; }
+        public SalesmanDto Salesman { get; set; } = default!;
+    }
+}

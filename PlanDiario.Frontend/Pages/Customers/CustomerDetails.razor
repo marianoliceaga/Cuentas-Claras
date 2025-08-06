@@ -1,0 +1,118 @@
+﻿@page "/customers/{Id:guid}"
+@using PlanDiario.Application.DTOs
+@using PlanDiario.Frontend.Services
+@inject ICustomerService CustomerService
+@inject NavigationManager Navigation
+
+<PageTitle>Customer Details</PageTitle>
+
+@if (loading)
+{
+    <div class="text-center">
+        <div class="spinner-border" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+}
+else if (customer != null)
+{
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3>Customer Details</h3>
+        <div>
+            <button class="btn btn-primary me-2" @onclick="() => NavigateToEdit()">
+                <i class="fas fa-edit"></i> Edit
+            </button>
+            <button class="btn btn-secondary" @onclick="GoBack">
+                <i class="fas fa-arrow-left"></i> Back to List
+            </button>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">@($"{customer.Name} {customer.LastName}")</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <dl class="row">
+                                <dt class="col-sm-4">DNI:</dt>
+                                <dd class="col-sm-8">@customer.DNI</dd>
+
+                                <dt class="col-sm-4">Name:</dt>
+                                <dd class="col-sm-8">@customer.Name</dd>
+
+                                <dt class="col-sm-4">Last Name:</dt>
+                                <dd class="col-sm-8">@customer.LastName</dd>
+
+                                <dt class="col-sm-4">Email:</dt>
+                                <dd class="col-sm-8">@customer.Email</dd>
+                            </dl>
+                        </div>
+                        <div class="col-md-6">
+                            <dl class="row">
+                                <dt class="col-sm-4">Phone 1:</dt>
+                                <dd class="col-sm-8">@customer.Phone1</dd>
+
+                                <dt class="col-sm-4">Phone 2:</dt>
+                                <dd class="col-sm-8">@customer.Phone2</dd>
+
+                                <dt class="col-sm-4">Phone 3:</dt>
+                                <dd class="col-sm-8">@customer.Phone3</dd>
+                            </dl>
+                        </div>
+                    </div>
+
+                    <hr />
+
+                    <h6>Address Information</h6>
+                    <dl class="row">
+                        <dt class="col-sm-2">Address 1:</dt>
+                        <dd class="col-sm-4">@customer.Address1</dd>
+
+                        <dt class="col-sm-2">Address 2:</dt>
+                        <dd class="col-sm-4">@customer.Address2</dd>
+
+                        <dt class="col-sm-2">Locality:</dt>
+                        <dd class="col-sm-4">@customer.Locality?.Name</dd>
+                    </dl>
+
+                    <hr />
+
+                    <h6>Business Information</h6>
+                    <dl class="row">
+                        <dt class="col-sm-2">Collector:</dt>
+                        <dd class="col-sm-4">@customer.Collector?.Name</dd>
+
+                        <dt class="col-sm-2">Salesman:</dt>
+                        <dd class="col-sm-4">@customer.Salesman?.Name</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="alert alert-danger">
+        <i class="fas fa-exclamation-triangle"></i> Customer not found.
+    </div>
+}
+
+@code {
+    [Parameter] public Guid Id { get; set; }
+
+    private CustomerDto? customer;
+    private bool loading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        customer = await CustomerService.GetCustomerByIdAsync(Id);
+        loading = false;
+    }
+
+    private void NavigateToEdit() => Navigation.NavigateTo($"/customers/edit/{Id}");
+    private void GoBack() => Navigation.NavigateTo("/customers");
+}
