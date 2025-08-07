@@ -16,6 +16,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Pages\Collectors\" />
+    <Folder Include="Pages\Salesman\" />
     <Folder Include="Shared\" />
   </ItemGroup>
 

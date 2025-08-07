@@ -61,7 +61,7 @@ namespace PlanDiario.Infrastructure.Persistence
                 entity.Property(e => e.Name).IsRequired().HasMaxLength(200);
                 entity.Property(e => e.CostPrice).HasColumnType("decimal(18,2)");
                 entity.Property(e => e.SalePrice).HasColumnType("decimal(18,2)");
-                entity.HasOne(e => e.Subcategory).WithMany(s => s.Products).HasForeignKey(e => e.idSubcategory);
+                entity.HasOne(e => e.Subcategory).WithMany(s => s.Products).HasForeignKey(e => e.SubcategoryId);
             });
 
             // OrderProduct configuration
@@ -567,7 +567,7 @@ namespace PlanDiario.Infrastructure.Persistence
                    CostPrice = 1000m,
                    SalePrice = 1999m,
                    Image = null,
-                   idSubcategory = 1,
+                   SubcategoryId = 1,
                    ProviderUrl = "https://proveedor.example/silla-plastica"
                },
                new Product
@@ -579,7 +579,7 @@ namespace PlanDiario.Infrastructure.Persistence
                    CostPrice = 5200m,
                    SalePrice = 8490m,
                    Image = null,
-                   idSubcategory = 1,
+                   SubcategoryId = 1,
                    ProviderUrl = "https://proveedor.example/mesa-plegable"
                },
                new Product
@@ -591,7 +591,7 @@ namespace PlanDiario.Infrastructure.Persistence
                    CostPrice = 148000m,
                    SalePrice = 214900m,
                    Image = null,
-                   idSubcategory = 2,
+                   SubcategoryId = 2,
                    ProviderUrl = "https://proveedor.example/heladera-400l"
                },
                new Product
@@ -603,7 +603,7 @@ namespace PlanDiario.Infrastructure.Persistence
                    CostPrice = 42000m,
                    SalePrice = 62990m,
                    Image = null,
-                   idSubcategory = 2,
+                   SubcategoryId = 2,
                    ProviderUrl = "https://proveedor.example/microondas-23l"
                },
                new Product
@@ -615,7 +615,7 @@ namespace PlanDiario.Infrastructure.Persistence
                    CostPrice = 1100m,
                    SalePrice = 1990m,
                    Image = null,
-                   idSubcategory = 3,
+                   SubcategoryId = 3,
                    ProviderUrl = "https://proveedor.example/lampara-led"
                }
             );
@@ -755,7 +755,7 @@ namespace PlanDiario.Infrastructure.Persistence
 
                 entity.HasOne(e => e.Subcategory)
                       .WithMany()
-                      .HasForeignKey(e => e.idSubcategory)
+                      .HasForeignKey(e => e.SubcategoryId)
                       .OnDelete(DeleteBehavior.Restrict);
             });
 

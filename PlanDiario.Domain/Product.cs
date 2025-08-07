@@ -9,7 +9,7 @@
         public decimal CostPrice { get; set; }
         public decimal SalePrice { get; set; }
         public byte[]? Image { get; set; }
-        public int idSubcategory { get; set; }
+        public int SubcategoryId { get; set; }
         public Subcategory Subcategory { get; set; } = default!;
         public string ProviderUrl { get; set; } = string.Empty;
         

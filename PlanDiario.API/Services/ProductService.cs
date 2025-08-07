@@ -40,7 +40,7 @@ namespace PlanDiario.API.Services
         public async Task<IEnumerable<ProductDto>> GetProductsBySubcategoryAsync(int subcategoryId)
         {
             var products = await _context.Products
-                .Where(p => p.idSubcategory == subcategoryId)
+                .Where(p => p.SubcategoryId == subcategoryId)
                 .Include(p => p.Subcategory)
                     .ThenInclude(s => s.Category)
                         .ThenInclude(c => c.Line)
@@ -65,7 +65,7 @@ namespace PlanDiario.API.Services
                 CostPrice = product.CostPrice,
                 SalePrice = product.SalePrice,
                 Image = product.Image,
-                idSubcategory = product.idSubcategory,
+                SubcategoryId = product.SubcategoryId,
                 Subcategory = new SubcategoryDto
                 {
                     Id = product.Subcategory.Id,

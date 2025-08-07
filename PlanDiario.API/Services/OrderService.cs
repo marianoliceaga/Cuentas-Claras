@@ -245,7 +245,7 @@ namespace PlanDiario.API.Services
                         CostPrice = op.Product.CostPrice,
                         SalePrice = op.Product.SalePrice,
                         Image = op.Product.Image,
-                        idSubcategory = op.Product.idSubcategory,
+                        SubcategoryId = op.Product.SubcategoryId,
                         Subcategory = new SubcategoryDto
                         {
                             Id = op.Product.Subcategory.Id,
