@@ -1,5 +1,10 @@
 ﻿@using Microsoft.AspNetCore.Components.Forms
 @using PlanDiario.Application.DTOs
+@using PlanDiario.Domain
+@using PlanDiario.Frontend.Services
+@inject ILocalityService LocalityService
+@inject ICollectorService CollectorService
+@inject ISalesmanService SalesmanService
 
 <EditForm Model="Model" OnValidSubmit="OnValidSubmit">
     <DataAnnotationsValidator />
@@ -65,19 +70,46 @@
 
             <div class="mb-3">
                 <label class="form-label">Locality <span class="text-danger">*</span></label>
-                <InputNumber @bind-Value="Model.LocalityId" class="form-control" disabled="@IsLoading" />
+                <InputSelect @bind-Value="Model.LocalityId" class="form-control" disabled="@IsLoading">
+                    <option value="0">-- Select Locality --</option>
+                    @if (localities != null)
+                    {
+                        @foreach (var locality in localities)
+                        {
+                            <option value="@locality.Id">@locality.Name</option>
+                        }
+                    }
+                </InputSelect>
                 <ValidationMessage For="() => Model.LocalityId" />
             </div>
 
             <div class="mb-3">
                 <label class="form-label">Collector <span class="text-danger">*</span></label>
-                <InputNumber @bind-Value="Model.CollectorId" class="form-control" disabled="@IsLoading" />
+                <InputSelect @bind-Value="Model.CollectorId" class="form-control" disabled="@IsLoading">
+                    <option value="0">-- Select Collector --</option>
+                    @if (collectors != null)
+                    {
+                        @foreach (var collector in collectors)
+                        {
+                            <option value="@collector.Id">@collector.Name</option>
+                        }
+                    }
+                </InputSelect>
                 <ValidationMessage For="() => Model.CollectorId" />
             </div>
 
             <div class="mb-3">
                 <label class="form-label">Salesman <span class="text-danger">*</span></label>
-                <InputNumber @bind-Value="Model.SalesmanId" class="form-control" disabled="@IsLoading" />
+                <InputSelect @bind-Value="Model.SalesmanId" class="form-control" disabled="@IsLoading">
+                    <option value="0">-- Select Salesman --</option>
+                    @if (salesmen != null)
+                    {
+                        @foreach (var salesman in salesmen)
+                        {
+                            <option value="@salesman.Id">@salesman.Name</option>
+                        }
+                    }
+                </InputSelect>
                 <ValidationMessage For="() => Model.SalesmanId" />
             </div>
         </div>
@@ -102,4 +134,28 @@
     [Parameter] public EventCallback OnValidSubmit { get; set; }
     [Parameter] public EventCallback OnCancel { get; set; }
     [Parameter] public bool IsLoading { get; set; }
+
+    private List<Locality>? localities;
+    private List<Collector>? collectors;
+    private List<Salesman>? salesmen;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadLookupData();
+    }
+
+    private async Task LoadLookupData()
+    {
+        try
+        {
+            localities = await LocalityService.GetAllLocalitiesAsync();
+            collectors = await CollectorService.GetAllCollectorsAsync();
+            salesmen = await SalesmanService.GetAllSalesmenAsync();
+        }
+        catch (Exception ex)
+        {
+            // Log the error or handle it appropriately
+            Console.WriteLine($"Error loading lookup data: {ex.Message}");
+        }
+    }
 }
