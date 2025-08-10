@@ -136,8 +136,8 @@
     [Parameter] public bool IsLoading { get; set; }
 
     private List<Locality>? localities;
-    private List<Collector>? collectors;
-    private List<Salesman>? salesmen;
+    private List<CollectorDto>? collectors;
+    private List<SalesmanDto>? salesmen;
 
     protected override async Task OnInitializedAsync()
     {
@@ -149,8 +149,8 @@
         try
         {
             localities = await LocalityService.GetAllLocalitiesAsync();
-            collectors = await CollectorService.GetAllCollectorsAsync();
-            salesmen = await SalesmanService.GetAllSalesmenAsync();
+            collectors = (await CollectorService.GetAllAsync()).ToList();
+            salesmen = (await SalesmanService.GetAllAsync()).ToList();
         }
         catch (Exception ex)
         {

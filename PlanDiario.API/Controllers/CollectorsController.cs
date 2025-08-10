@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using PlanDiario.Infrastructure.Persistence;
+using PlanDiario.Application.DTOs;
+using PlanDiario.API.Services.Interfaces;
 
 namespace PlanDiario.API.Controllers
 {
@@ -8,38 +8,84 @@ namespace PlanDiario.API.Controllers
     [Route("api/[controller]")]
     public class CollectorsController : ControllerBase
     {
-        private readonly PlanDiarioDbContext _context;
+        private readonly ICollectorService _collectorService;
 
-        public CollectorsController(PlanDiarioDbContext context)
+        public CollectorsController(ICollectorService collectorService)
         {
-            _context = context;
+            _collectorService = collectorService;
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<object>>> GetCollectors()
+        public async Task<ActionResult<IEnumerable<CollectorDto>>> GetCollectors()
         {
-            var collectors = await _context.Collectors
-                .OrderBy(c => c.Name)
-                .Select(c => new { c.Id, c.Name, c.CommisionPercentage })
-                .ToListAsync();
-
+            var collectors = await _collectorService.GetAllAsync();
             return Ok(collectors);
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<object>> GetCollector(int id)
+        public async Task<ActionResult<CollectorDto>> GetCollector(int id)
         {
-            var collector = await _context.Collectors
-                .Where(c => c.Id == id)
-                .Select(c => new { c.Id, c.Name, c.CommisionPercentage })
-                .FirstOrDefaultAsync();
+            var collector = await _collectorService.GetByIdAsync(id);
 
             if (collector == null)
             {
-                return NotFound();
+                return NotFound($"Collector with ID {id} not found.");
             }
 
             return Ok(collector);
+        }
+
+        [HttpPost]
+        public async Task<ActionResult<CollectorDto>> CreateCollector(CollectorDto collectorDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var createdCollector = await _collectorService.CreateAsync(collectorDto);
+            return CreatedAtAction(nameof(GetCollector), new { id = createdCollector.Id }, createdCollector);
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateCollector(int id, CollectorDto collectorDto)
+        {
+            if (id != collectorDto.Id)
+            {
+                return BadRequest("ID mismatch.");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var updated = await _collectorService.UpdateAsync(id, collectorDto);
+            if (!updated)
+            {
+                return NotFound($"Collector with ID {id} not found.");
+            }
+
+            return NoContent();
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteCollector(int id)
+        {
+            try
+            {
+                var deleted = await _collectorService.DeleteAsync(id);
+                if (!deleted)
+                {
+                    return NotFound($"Collector with ID {id} not found.");
+                }
+
+                return NoContent();
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
     }
 }
