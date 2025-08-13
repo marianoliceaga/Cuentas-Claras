@@ -15,35 +15,143 @@ namespace PlanDiario.API.Controllers
             _productService = productService;
         }
 
+        /// <summary>
+        /// Get all products with pagination and optional filtering
+        /// </summary>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ProductDto>>> GetProducts()
+        public async Task<ActionResult<ApiResponse<PagedResult<ProductDto>>>> GetAllProducts(
+            [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 10,
+            [FromQuery] string? searchTerm = null,
+            [FromQuery] int? subcategoryId = null)
         {
-            var products = await _productService.GetAllProductsAsync();
-            return Ok(products);
+            try
+            {
+                var result = await _productService.GetAllAsync(pageNumber, pageSize, searchTerm, subcategoryId);
+                return Ok(ApiResponse<PagedResult<ProductDto>>.SuccessResult(result));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ApiResponse<PagedResult<ProductDto>>.ErrorResult($"Error retrieving products: {ex.Message}"));
+            }
         }
 
+        /// <summary>
+        /// Get a specific product by ID
+        /// </summary>
         [HttpGet("{id}")]
-        public async Task<ActionResult<ProductDto>> GetProduct(int id)
+        public async Task<ActionResult<ApiResponse<ProductDto>>> GetProduct(int id)
         {
-            var product = await _productService.GetProductByIdAsync(id);
-            if (product == null)
-                return NotFound();
+            try
+            {
+                var product = await _productService.GetByIdAsync(id);
+                if (product == null)
+                {
+                    return NotFound(ApiResponse<ProductDto>.ErrorResult("Product not found"));
+                }
 
-            return Ok(product);
+                return Ok(ApiResponse<ProductDto>.SuccessResult(product));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ApiResponse<ProductDto>.ErrorResult($"Error retrieving product: {ex.Message}"));
+            }
         }
 
-        [HttpGet("by-subcategory/{subcategoryId}")]
-        public async Task<ActionResult<IEnumerable<ProductDto>>> GetProductsBySubcategory(int subcategoryId)
+        /// <summary>
+        /// Create a new product
+        /// </summary>
+        [HttpPost]
+        public async Task<ActionResult<ApiResponse<ProductDto>>> CreateProduct([FromBody] CreateProductDto createProductDto)
         {
-            var products = await _productService.GetProductsBySubcategoryAsync(subcategoryId);
-            return Ok(products);
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    var errors = ModelState.Values
+                        .SelectMany(v => v.Errors)
+                        .Select(e => e.ErrorMessage)
+                        .ToList();
+                    return BadRequest(ApiResponse<ProductDto>.ErrorResult("Validation errors", errors));
+                }
+
+                var product = await _productService.CreateAsync(createProductDto);
+                return CreatedAtAction(nameof(GetProduct), new { id = product.Id }, ApiResponse<ProductDto>.SuccessResult(product, "Product created successfully"));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ApiResponse<ProductDto>.ErrorResult($"Error creating product: {ex.Message}"));
+            }
         }
 
-        [HttpGet("{id}/exists")]
-        public async Task<ActionResult<bool>> ProductExists(int id)
+        /// <summary>
+        /// Update an existing product
+        /// </summary>
+        [HttpPut("{id}")]
+        public async Task<ActionResult<ApiResponse<ProductDto>>> UpdateProduct(int id, [FromBody] UpdateProductDto updateProductDto)
         {
-            var exists = await _productService.ProductExistsAsync(id);
-            return Ok(exists);
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    var errors = ModelState.Values
+                        .SelectMany(v => v.Errors)
+                        .Select(e => e.ErrorMessage)
+                        .ToList();
+                    return BadRequest(ApiResponse<ProductDto>.ErrorResult("Validation errors", errors));
+                }
+
+                var product = await _productService.UpdateAsync(id, updateProductDto);
+                if (product == null)
+                {
+                    return NotFound(ApiResponse<ProductDto>.ErrorResult("Product not found"));
+                }
+
+                return Ok(ApiResponse<ProductDto>.SuccessResult(product, "Product updated successfully"));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ApiResponse<ProductDto>.ErrorResult($"Error updating product: {ex.Message}"));
+            }
+        }
+
+        /// <summary>
+        /// Delete a product
+        /// </summary>
+        [HttpDelete("{id}")]
+        public async Task<ActionResult<ApiResponse<bool>>> DeleteProduct(int id)
+        {
+            try
+            {
+                var result = await _productService.DeleteAsync(id);
+                if (!result)
+                {
+                    return NotFound(ApiResponse<bool>.ErrorResult("Product not found"));
+                }
+
+                return Ok(ApiResponse<bool>.SuccessResult(true, "Product deleted successfully"));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ApiResponse<bool>.ErrorResult($"Error deleting product: {ex.Message}"));
+            }
+        }
+
+        /// <summary>
+        /// Get all subcategories
+        /// </summary>
+        [HttpGet("subcategories")]
+        public async Task<ActionResult<ApiResponse<List<SubcategoryDto>>>> GetSubcategories()
+        {
+            try
+            {
+                var subcategories = await _productService.GetSubcategoriesAsync();
+                return Ok(ApiResponse<List<SubcategoryDto>>.SuccessResult(subcategories));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ApiResponse<List<SubcategoryDto>>.ErrorResult($"Error retrieving subcategories: {ex.Message}"));
+            }
         }
     }
 }

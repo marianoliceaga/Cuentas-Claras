@@ -15,46 +15,117 @@ namespace PlanDiario.API.Services
             _context = context;
         }
 
-        public async Task<IEnumerable<ProductDto>> GetAllProductsAsync()
+        public async Task<PagedResult<ProductDto>> GetAllAsync(int pageNumber = 1, int pageSize = 10, string? searchTerm = null, int? subcategoryId = null)
         {
-            var products = await _context.Products
-                .Include(p => p.Subcategory)
-                    .ThenInclude(s => s.Category)
-                        .ThenInclude(c => c.Line)
+            var query = _context.Products.Include(p => p.Subcategory).AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+            {
+                query = query.Where(p => p.Name.Contains(searchTerm) || p.Description.Contains(searchTerm));
+            }
+
+            if (subcategoryId.HasValue)
+            {
+                query = query.Where(p => p.SubcategoryId == subcategoryId.Value);
+            }
+
+            var totalCount = await query.CountAsync();
+
+            var products = await query
+                .OrderBy(p => p.Name)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
                 .ToListAsync();
 
-            return products.Select(MapToDto);
+            var productDtos = products.Select(MapToProductDto).ToList();
+
+            return new PagedResult<ProductDto>
+            {
+                Items = productDtos,
+                TotalCount = totalCount,
+                PageNumber = pageNumber,
+                PageSize = pageSize
+            };
         }
 
-        public async Task<ProductDto?> GetProductByIdAsync(int id)
+        public async Task<ProductDto?> GetByIdAsync(int id)
         {
             var product = await _context.Products
                 .Include(p => p.Subcategory)
-                    .ThenInclude(s => s.Category)
-                        .ThenInclude(c => c.Line)
                 .FirstOrDefaultAsync(p => p.Id == id);
-
-            return product != null ? MapToDto(product) : null;
+            return product == null ? null : MapToProductDto(product);
         }
 
-        public async Task<IEnumerable<ProductDto>> GetProductsBySubcategoryAsync(int subcategoryId)
+        public async Task<ProductDto> CreateAsync(CreateProductDto createProductDto)
         {
-            var products = await _context.Products
-                .Where(p => p.SubcategoryId == subcategoryId)
+            var product = new Product
+            {
+                Name = createProductDto.Name,
+                Description = createProductDto.Description,
+                Characteristics = createProductDto.Characteristics,
+                CostPrice = createProductDto.CostPrice,
+                SalePrice = createProductDto.SalePrice,
+                Image = createProductDto.Image,
+                SubcategoryId = createProductDto.SubcategoryId,
+                ProviderUrl = createProductDto.ProviderUrl
+            };
+
+            _context.Products.Add(product);
+            await _context.SaveChangesAsync();
+
+            // Load subcategory for response
+            await _context.Entry(product)
+                .Reference(p => p.Subcategory)
+                .LoadAsync();
+
+            return MapToProductDto(product);
+        }
+
+        public async Task<ProductDto?> UpdateAsync(int id, UpdateProductDto updateProductDto)
+        {
+            var product = await _context.Products
                 .Include(p => p.Subcategory)
-                    .ThenInclude(s => s.Category)
-                        .ThenInclude(c => c.Line)
-                .ToListAsync();
+                .FirstOrDefaultAsync(p => p.Id == id);
+            if (product == null) return null;
 
-            return products.Select(MapToDto);
+            product.Name = updateProductDto.Name;
+            product.Description = updateProductDto.Description;
+            product.Characteristics = updateProductDto.Characteristics;
+            product.CostPrice = updateProductDto.CostPrice;
+            product.SalePrice = updateProductDto.SalePrice;
+            product.Image = updateProductDto.Image;
+            product.SubcategoryId = updateProductDto.SubcategoryId;
+            product.ProviderUrl = updateProductDto.ProviderUrl;
+
+            await _context.SaveChangesAsync();
+
+            return MapToProductDto(product);
         }
 
-        public async Task<bool> ProductExistsAsync(int id)
+        public async Task<bool> DeleteAsync(int id)
         {
-            return await _context.Products.AnyAsync(p => p.Id == id);
+            var product = await _context.Products.FindAsync(id);
+            if (product == null) return false;
+
+            _context.Products.Remove(product);
+            await _context.SaveChangesAsync();
+
+            return true;
         }
 
-        private static ProductDto MapToDto(Product product)
+        public async Task<List<SubcategoryDto>> GetSubcategoriesAsync()
+        {
+            return await _context.Subcategories
+                .Select(s => new SubcategoryDto
+                {
+                    Id = s.Id,
+                    Name = s.Name
+                })
+                .OrderBy(s => s.Name)
+                .ToListAsync();
+        }
+
+        private static ProductDto MapToProductDto(Product product)
         {
             return new ProductDto
             {
@@ -66,24 +137,12 @@ namespace PlanDiario.API.Services
                 SalePrice = product.SalePrice,
                 Image = product.Image,
                 SubcategoryId = product.SubcategoryId,
-                Subcategory = new SubcategoryDto
+                ProviderUrl = product.ProviderUrl,
+                Subcategory = product.Subcategory != null ? new SubcategoryDto
                 {
                     Id = product.Subcategory.Id,
-                    Name = product.Subcategory.Name,
-                    CategoryId = product.Subcategory.CategoryId,
-                    Category = new CategoryDto
-                    {
-                        Id = product.Subcategory.Category.Id,
-                        Name = product.Subcategory.Category.Name,
-                        LineId = product.Subcategory.Category.LineId,
-                        Line = new LineDto
-                        {
-                            Id = product.Subcategory.Category.Line.Id,
-                            Name = product.Subcategory.Category.Line.Name
-                        }
-                    }
-                },
-                ProviderUrl = product.ProviderUrl
+                    Name = product.Subcategory.Name
+                } : null
             };
         }
     }

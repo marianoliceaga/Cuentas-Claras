@@ -1,0 +1,126 @@
+﻿@page "/productplans/edit/{id:int}"
+@using PlanDiario.Application.DTOs
+@using PlanDiario.Frontend.Services
+@inject IProductPlanService ProductPlanService
+@inject NavigationManager Navigation
+@inject IJSRuntime JSRuntime
+
+<PageTitle>Edit Product Plan</PageTitle>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            @if (loading)
+            {
+                <div class="text-center">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            }
+            else if (productPlanFound)
+            {
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Edit Product Plan</h3>
+                    </div>
+                    <div class="card-body">
+                        @if (originalProductPlan != null)
+                        {
+                            <div class="alert alert-info">
+                                <strong>Plan:</strong> @originalProductPlan.PlanName<br />
+                                <strong>Product:</strong> @originalProductPlan.ProductName<br />
+                                <strong>Category:</strong> @originalProductPlan.CategoryName > @originalProductPlan.SubcategoryName<br />
+                                <strong>Unit Price:</strong> $@originalProductPlan.ProductPrice.ToString("F2")
+                            </div>
+                        }
+
+                        <EditForm Model="updateProductPlanDto" OnValidSubmit="HandleValidSubmit">
+                            <DataAnnotationsValidator />
+                            <ValidationSummary class="alert alert-danger" />
+
+                            <div class="mb-3">
+                                <label for="quantity" class="form-label">Quantity *</label>
+                                <InputNumber id="quantity" class="form-control" @bind-Value="updateProductPlanDto.Quantity" min="1" />
+                                <ValidationMessage For="@(() => updateProductPlanDto.Quantity)" />
+
+                                @if (originalProductPlan?.ProductPrice != null && updateProductPlanDto.Quantity > 0)
+                                {
+                                    <div class="form-text">
+                                        Total: $@((originalProductPlan.ProductPrice != 0 ? originalProductPlan.ProductPrice : 0) * updateProductPlanDto.Quantity)
+                                    </div>
+                                }
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="notes" class="form-label">Notes</label>
+                                <InputTextArea id="notes" class="form-control" rows="3" @bind-Value="updateProductPlanDto.Notes" />
+                                <ValidationMessage For="@(() => updateProductPlanDto.Notes)" />
+                            </div>
+
+                            <div class="d-flex justify-content-between">
+                                <button type="button" class="btn btn-secondary" @onclick="() => Navigation.NavigateTo('/productplans')">
+                                    <i class="fas fa-arrow-left"></i> Back to Product Plans
+                                </button>
+                                <button type="submit" class="btn btn-primary" disabled="@submitting">
+                                    @if (submitting)
+                                    {
+                                        <span class="spinner-border spinner-border-sm me-2"></span>
+                                    }
+                                    <i class="fas fa-save"></i> Update Product Plan
+                                </button>
+                            </div>
+                        </EditForm>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle"></i> Product plan not found.
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public int Id { get; set; }
+
+    private UpdateProductPlanDto updateProductPlanDto = new();
+    private ProductPlanDto? originalProductPlan;
+    private bool loading = true;
+    private bool submitting = false;
+    private bool productPlanFound = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var result = await ProductPlanService.GetByIdAsync(Id);
+
+        if (result?.Success == true && result.Data != null)
+        {
+            originalProductPlan = result.Data;
+            productPlanFound = true;
+        }
+
+        loading = false;
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        submitting = true;
+        var result = await ProductPlanService.UpdateAsync(Id, updateProductPlanDto);
+
+        if (result?.Success == true)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", "Product plan updated successfully!");
+            Navigation.NavigateTo("/productplans");
+        }
+        else
+        {
+            await JSRuntime.InvokeVoidAsync("alert", $"Error updating product plan: {result?.Message}");
+        }
+
+        submitting = false;
+    }
+}

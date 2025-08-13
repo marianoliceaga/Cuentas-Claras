@@ -1,0 +1,74 @@
+﻿@page "/plans/create"
+@using PlanDiario.Application.DTOs
+@using PlanDiario.Frontend.Services
+@inject IPlanService PlanService
+@inject NavigationManager Navigation
+@inject IJSRuntime JSRuntime
+
+<PageTitle>Create Plan</PageTitle>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Create New Plan</h3>
+                </div>
+                <div class="card-body">
+                    <EditForm Model="createPlanDto" OnValidSubmit="HandleValidSubmit">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary class="alert alert-danger" />
+
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Name *</label>
+                            <InputText id="name" class="form-control" @bind-Value="createPlanDto.Name" />
+                            <ValidationMessage For="@(() => createPlanDto.Name)" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description</label>
+                            <InputTextArea id="description" class="form-control" rows="4" @bind-Value="createPlanDto.Description" />
+                            <ValidationMessage For="@(() => createPlanDto.Description)" />
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <button type="button" class="btn btn-secondary" @onclick="() => Navigation.NavigateTo('/plans')">
+                                <i class="fas fa-arrow-left"></i> Back to Plans
+                            </button>
+                            <button type="submit" class="btn btn-primary" disabled="@loading">
+                                @if (loading)
+                                {
+                                    <span class="spinner-border spinner-border-sm me-2"></span>
+                                }
+                                <i class="fas fa-save"></i> Create Plan
+                            </button>
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private CreatePlanDto createPlanDto = new();
+    private bool loading = false;
+
+    private async Task HandleValidSubmit()
+    {
+        loading = true;
+        var result = await PlanService.CreateAsync(createPlanDto);
+
+        if (result?.Success == true)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", "Plan created successfully!");
+            Navigation.NavigateTo("/plans");
+        }
+        else
+        {
+            await JSRuntime.InvokeVoidAsync("alert", $"Error creating plan: {result?.Message}");
+        }
+
+        loading = false;
+    }
+}

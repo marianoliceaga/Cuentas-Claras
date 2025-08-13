@@ -1,0 +1,259 @@
+﻿@page "/productplans/create"
+@using PlanDiario.Application.DTOs
+@using PlanDiario.Frontend.Services
+@inject IProductPlanService ProductPlanService
+@inject IPlanService PlanService
+@inject IProductService ProductService
+@inject NavigationManager Navigation
+@inject IJSRuntime JSRuntime
+
+<PageTitle>Create Product Plan</PageTitle>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Create New Product Plan</h3>
+                </div>
+                <div class="card-body">
+                    @if (loading)
+                    {
+                        <div class="text-center">
+                            <div class="spinner-border" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <EditForm Model="createProductPlanDto" OnValidSubmit="@HandleValidSubmit">
+                            <DataAnnotationsValidator />
+                            <ValidationSummary class="alert alert-danger" />
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="plan" class="form-label">Plan *</label>
+                                        <InputSelect id="plan" class="form-select" @bind-Value="createProductPlanDto.PlanId" @onchange="OnPlanChange">
+                                            <option value="">Select a plan</option>
+                                            @if (plans?.Any() == true)
+                                            {
+                                                @foreach (var plan in plans)
+                                                {
+                                                    <option value="@plan.Id">@plan.Name</option>
+                                                }
+                                            }
+                                        </InputSelect>
+                                        <ValidationMessage For="@(() => createProductPlanDto.PlanId)" />
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="product" class="form-label">Product *</label>
+                                        <InputSelect id="product" class="form-select" @bind-Value="createProductPlanDto.ProductId" @onchange="OnProductChange">
+                                            <option value="">Select a product</option>
+                                            @if (availableProducts?.Any() == true)
+                                            {
+                                                @foreach (var product in availableProducts)
+                                                {
+                                                    <option value="@product.Id">
+                                                        @product.Name
+                                                        @if (product.Subcategory != null)
+                                                        {
+                                                            <span> - @product.Subcategory.Name</span>
+                                                        }
+                                                        <span> ($@product.SalePrice.ToString("F2"))</span>
+                                                    </option>
+                                                }
+                                            }
+                                        </InputSelect>
+                                        <ValidationMessage For="@(() => createProductPlanDto.ProductId)" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            @if (selectedPlan != null)
+                            {
+                                <div class="alert alert-info">
+                                    <strong>Selected Plan:</strong> @selectedPlan.Name<br />
+                                    <small>@selectedPlan.Description</small>
+                                </div>
+                            }
+
+                            @if (selectedProduct != null)
+                            {
+                                <div class="alert alert-success">
+                                    <strong>Selected Product:</strong> @selectedProduct.Name<br />
+                                    <small>
+                                        Category:
+                                        @if (selectedProduct.Subcategory?.Category != null)
+                                        {
+                                            @selectedProduct.Subcategory.Category.Name
+                                            <span> &gt; </span>
+                                        }
+                                        @if (selectedProduct.Subcategory != null)
+                                        {
+                                            @selectedProduct.Subcategory.Name
+                                        }
+                                    </small><br />
+                                    <small>Price: $@selectedProduct.SalePrice.ToString("F2")</small>
+                                </div>
+                            }
+
+                            <div class="mb-3">
+                                <label for="quantity" class="form-label">Quantity *</label>
+                                <InputNumber id="quantity" class="form-control" @bind-Value="quantity" min="1" />
+                                <ValidationMessage For="@(() => quantity)" />
+
+                                @if (selectedProduct != null && quantity > 0)
+                                {
+                                    <div class="form-text">
+                                        Total: $@(selectedProduct.SalePrice * quantity)
+                                    </div>
+                                }
+                            </div>
+
+                            <div class="d-flex justify-content-between">
+                                <button type="button" class="btn btn-secondary" @onclick='() => Navigation.NavigateTo("/productplans")'>
+                                    <i class="fas fa-arrow-left"></i> Back to Product Plans
+                                </button>
+                                <button type="submit" class="btn btn-primary" disabled="@submitting">
+                                    @if (submitting)
+                                    {
+                                        <span class="spinner-border spinner-border-sm me-2"></span>
+                                    }
+                                    <i class="fas fa-save"></i> Create Product Plan
+                                </button>
+                            </div>
+                        </EditForm>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private CreateProductPlanDto createProductPlanDto = new();
+    private int quantity = 1;
+    private List<PlanDto> plans = new();
+    private List<ProductDto> products = new();
+    private List<ProductDto> availableProducts = new();
+    private PlanDto? selectedPlan;
+    private ProductDto? selectedProduct;
+    private bool loading = true;
+    private bool submitting = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadPlans();
+        await LoadProducts();
+        availableProducts = products;
+        loading = false;
+    }
+
+    private async Task LoadPlans()
+    {
+        var result = await PlanService.GetAllAsync(1, 1000);
+        if (result?.Success == true && result.Data != null)
+        {
+            plans = result.Data.Items;
+        }
+    }
+
+    private async Task LoadProducts()
+    {
+        var result = await ProductService.GetAllAsync(1, 1000);
+        if (result?.Success == true && result.Data != null)
+        {
+            products = result.Data.Items;
+        }
+    }
+
+    private async Task OnPlanChange(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out int planId))
+        {
+            selectedPlan = plans.FirstOrDefault(p => p.Id == planId);
+            createProductPlanDto.PlanId = planId;
+            await FilterAvailableProducts();
+        }
+        else
+        {
+            selectedPlan = null;
+            availableProducts = products;
+        }
+    }
+
+    private async Task FilterAvailableProducts()
+    {
+        if (selectedPlan != null)
+        {
+            // Get products already assigned to this plan
+            var assignedResult = await ProductPlanService.GetByPlanIdAsync(selectedPlan.Id);
+            var assignedProductIds = new HashSet<int>();
+
+            if (assignedResult?.Success == true && assignedResult.Data != null)
+            {
+                assignedProductIds = assignedResult.Data.Select(pp => pp.ProductId).ToHashSet();
+            }
+
+            // Filter out already assigned products
+            availableProducts = products.Where(p => !assignedProductIds.Contains(p.Id)).ToList();
+        }
+        else
+        {
+            availableProducts = products;
+        }
+
+        // Reset selected product if it's no longer available
+        if (selectedProduct != null && !availableProducts.Any(p => p.Id == selectedProduct.Id))
+        {
+            selectedProduct = null;
+            createProductPlanDto.ProductId = 0;
+        }
+    }
+
+    private void OnProductChange(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out int productId))
+        {
+            selectedProduct = products.FirstOrDefault(p => p.Id == productId);
+            createProductPlanDto.ProductId = productId;
+        }
+        else
+        {
+            selectedProduct = null;
+            createProductPlanDto.ProductId = 0;
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        submitting = true;
+        // Set quantity in the ProductPlanDto for creation
+        var dto = new CreateProductPlanDto
+        {
+            PlanId = createProductPlanDto.PlanId,
+            ProductId = createProductPlanDto.ProductId
+        };
+
+        // If your API expects quantity, you may need to use ProductPlanDto instead
+        // or extend CreateProductPlanDto to include Quantity
+
+        var result = await ProductPlanService.CreateAsync(dto);
+
+        if (result?.Success == true)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", "Product plan created successfully!");
+            Navigation.NavigateTo("/productplans");
+        }
+        else
+        {
+            await JSRuntime.InvokeVoidAsync("alert", $"Error creating product plan: {result?.Message}");
+        }
+
+        submitting = false;
+    }
+}

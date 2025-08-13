@@ -4,9 +4,11 @@ namespace PlanDiario.API.Services.Interfaces
 {
     public interface IProductService
     {
-        Task<IEnumerable<ProductDto>> GetAllProductsAsync();
-        Task<ProductDto?> GetProductByIdAsync(int id);
-        Task<IEnumerable<ProductDto>> GetProductsBySubcategoryAsync(int subcategoryId);
-        Task<bool> ProductExistsAsync(int id);
+        Task<PagedResult<ProductDto>> GetAllAsync(int pageNumber = 1, int pageSize = 10, string? searchTerm = null, int? subcategoryId = null);
+        Task<ProductDto?> GetByIdAsync(int id);
+        Task<ProductDto> CreateAsync(CreateProductDto createProductDto);
+        Task<ProductDto?> UpdateAsync(int id, UpdateProductDto updateProductDto);
+        Task<bool> DeleteAsync(int id);
+        Task<List<SubcategoryDto>> GetSubcategoriesAsync();
     }
 }

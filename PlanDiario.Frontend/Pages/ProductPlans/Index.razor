@@ -1,0 +1,244 @@
+﻿@page "/productplans"
+@using PlanDiario.Application.DTOs
+@using PlanDiario.Frontend.Services
+@inject IProductPlanService ProductPlanService
+@inject IPlanService PlanService
+@inject IProductService ProductService
+@inject NavigationManager Navigation
+@inject IJSRuntime JSRuntime
+
+<PageTitle>Product Plans Management</PageTitle>
+
+<div class="container-fluid">
+    <div class="row mb-3">
+        <div class="col">
+            <h1>Product Plans Management</h1>
+        </div>
+        <div class="col-auto">
+            @* <button class="btn btn-primary" @onclick="() => Navigation.NavigateTo('/productplans/create')">
+                <i class="fas fa-plus"></i> Create New Product Plan
+            </button> *@
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <select class="form-select" @bind="selectedPlanId" @onchange="OnPlanFilterChange">
+                <option value="">All Plans</option>
+                @if (plans?.Any() == true)
+                {
+                    @foreach (var plan in plans)
+                    {
+                        <option value="@plan.Id">@plan.Name</option>
+                    }
+                }
+            </select>
+        </div>
+        <div class="col-md-4">
+            <select class="form-select" @bind="selectedProductId" @onchange="OnProductFilterChange">
+                <option value="">All Products</option>
+                @if (products?.Any() == true)
+                {
+                    @foreach (var product in products)
+                    {
+                        <option value="@product.Id">@product.Name</option>
+                    }
+                }
+            </select>
+        </div>
+    </div>
+
+    @if (loading)
+    {
+        <div class="text-center">
+            <div class="spinner-border" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    }
+    else if (productPlans?.Any() == true)
+    {
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>ID</th>
+                                <th>Plan</th>
+                                <th>Product</th>
+                                <th>Category</th>
+                                <th>Quantity</th>
+                                <th>Unit Price</th>
+                                <th>Total</th>
+                                <th>Notes</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var productPlan in productPlans)
+                            {
+                                <tr>
+                                    <td>@productPlan.Id</td>
+                                    <td>@productPlan.PlanName</td>
+                                    <td>@productPlan.ProductName</td>
+                                    <td>@productPlan.CategoryName</td>
+                                    <td>@productPlan.Quantity</td>
+                                    <td>$@productPlan.ProductPrice.ToString("F2")</td>
+                                    <td>$@((productPlan.ProductPrice != 0 ? productPlan.ProductPrice : 0) * productPlan.Quantity)</td>
+                                    <td>@productPlan.Notes</td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <button class="btn btn-sm btn-info" @onclick="() => Navigation.NavigateTo('/productplans/{productPlan.Id}')">
+                                                <i class="fas fa-eye"></i> View
+                                            </button>
+                                            <button class="btn btn-sm btn-warning" @onclick="() => Navigation.NavigateTo('/productplans/edit/{productPlan.Id}')">
+                                                <i class="fas fa-edit"></i> Edit
+                                            </button>
+                                            <button class="btn btn-sm btn-danger" @onclick="() => DeleteProductPlan(productPlan.Id)">
+                                                <i class="fas fa-trash"></i> Delete
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                @* Pagination *@
+                @if (totalPages > 1)
+                {
+                    <nav aria-label="Product Plans pagination">
+                        <ul class="pagination justify-content-center">
+                            <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                                <button class="page-link" @onclick="() => LoadPage(currentPage - 1)" disabled="@(currentPage == 1)">Previous</button>
+                            </li>
+                            @for (int i = 1; i <= totalPages; i++)
+                            {
+                                int pagination = i;
+                                <li class="page-item @(currentPage == pagination ? "active" : "")">
+                                    <button class="page-link" @onclick="() => LoadPage(pagination)">@pagination</button>
+                                </li>
+                            }
+                            <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                                <button class="page-link" @onclick="() => LoadPage(currentPage + 1)" disabled="@(currentPage == totalPages)">Next</button>
+                            </li>
+                        </ul>
+                    </nav>
+                }
+
+                @* Summary *@
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <strong>Total Items: @productPlans.Sum(pp => pp.Quantity)</strong>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <strong>Total Value: $@productPlans.Sum(pp => (pp.ProductPrice != 0 ? pp.ProductPrice : 0) * pp.Quantity).ToString("F2")</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle"></i> No product plans found.
+        </div>
+    }
+</div>
+
+@code {
+    private List<ProductPlanDto> productPlans = new();
+    private List<PlanDto> plans = new();
+    private List<ProductDto> products = new();
+    private bool loading = true;
+    private string selectedPlanId = "";
+    private string selectedProductId = "";
+    private int currentPage = 1;
+    private int pageSize = 10;
+    private int totalPages = 1;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadPlans();
+        await LoadProducts();
+        await LoadProductPlans();
+    }
+
+    private async Task LoadPlans()
+    {
+        var result = await PlanService.GetAllAsync(1, 1000); // Get all plans
+        if (result?.Success == true && result.Data != null)
+        {
+            plans = result.Data.Items;
+        }
+    }
+
+    private async Task LoadProducts()
+    {
+        var result = await ProductService.GetAllAsync(1, 1000); // Get all products
+        if (result?.Success == true && result.Data != null)
+        {
+            products = result.Data.Items;
+        }
+    }
+
+    private async Task LoadProductPlans()
+    {
+        loading = true;
+        int? planId = string.IsNullOrEmpty(selectedPlanId) ? null : int.Parse(selectedPlanId);
+        int? productId = string.IsNullOrEmpty(selectedProductId) ? null : int.Parse(selectedProductId);
+        
+        var result = await ProductPlanService.GetAllAsync(currentPage, pageSize, planId, productId);
+        
+        if (result?.Success == true && result.Data != null)
+        {
+            productPlans = result.Data.Items;
+            totalPages = result.Data.TotalPages;
+        }
+        else
+        {
+            productPlans = new List<ProductPlanDto>();
+        }
+        
+        loading = false;
+    }
+
+    private async Task LoadPage(int page)
+    {
+        currentPage = page;
+        await LoadProductPlans();
+    }
+
+    private async Task OnPlanFilterChange(ChangeEventArgs e)
+    {
+        selectedPlanId = e.Value?.ToString() ?? "";
+        currentPage = 1;
+        await LoadProductPlans();
+    }
+
+    private async Task OnProductFilterChange(ChangeEventArgs e)
+    {
+        selectedProductId = e.Value?.ToString() ?? "";
+        currentPage = 1;
+        await LoadProductPlans();
+    }
+
+    private async Task DeleteProductPlan(int id)
+    {
+        if (await JSRuntime.InvokeAsync<bool>("confirm", "Are you sure you want to delete this product plan?"))
+        {
+            var result = await ProductPlanService.DeleteAsync(id);
+            if (result?.Success == true)
+            {
+                await LoadProductPlans();
+                await JSRuntime.InvokeVoidAsync("alert", "Product plan deleted successfully!");
+            }
+            else
+            {
+                await JSRuntime.InvokeVoidAsync("alert", $"Error deleting product plan: {result?.Message}");
+            }
+        }
+    }
+}

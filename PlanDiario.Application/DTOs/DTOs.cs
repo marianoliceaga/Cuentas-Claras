@@ -56,24 +56,6 @@
         public int ProductId { get; set; }
         public ProductDto Product { get; set; } = default!;
     }
-    
-    public class PlanDto
-    {
-        public int Id { get; set; }
-        public string Name { get; set; } = string.Empty;
-        public DateTime StartDate { get; set; }
-        public DateTime EndDate { get; set; }
-        public decimal InterestRate { get; set; }
-    }
-
-    public class ProductPlanDto
-    {
-        public int Id { get; set; }
-        public int ProductId { get; set; }
-        public ProductDto Product { get; set; } = default!;
-        public int PlanId { get; set; }
-        public PlanDto Plan { get; set; } = default!;
-    }
 
     public enum OrderStatus
     {

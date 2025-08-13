@@ -1,0 +1,155 @@
+﻿@page "/products/edit/{id:int}"
+@using PlanDiario.Application.DTOs
+@using PlanDiario.Frontend.Services
+@inject IProductService ProductService
+@inject NavigationManager Navigation
+@inject IJSRuntime JSRuntime
+
+<PageTitle>Edit Product</PageTitle>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            @if (loading)
+            {
+                <div class="text-center">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            }
+            else if (productFound)
+            {
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Edit Product</h3>
+                    </div>
+                    <div class="card-body">
+                        <EditForm Model="updateProductDto" OnValidSubmit="HandleValidSubmit">
+                            <DataAnnotationsValidator />
+                            <ValidationSummary class="alert alert-danger" />
+
+                            <div class="mb-3">
+                                <label for="name" class="form-label">Name *</label>
+                                <InputText id="name" class="form-control" @bind-Value="updateProductDto.Name" />
+                                <ValidationMessage For="@(() => updateProductDto.Name)" />
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="description" class="form-label">Description</label>
+                                <InputTextArea id="description" class="form-control" rows="3" @bind-Value="updateProductDto.Description" />
+                                <ValidationMessage For="@(() => updateProductDto.Description)" />
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="subcategory" class="form-label">Subcategory *</label>
+                                        <InputSelect id="subcategory" class="form-select" @bind-Value="updateProductDto.SubcategoryId">
+                                            <option value="">Select a subcategory</option>
+                                            @if (subcategories?.Any() == true)
+                                            {
+                                                @foreach (var subcategory in subcategories)
+                                                {
+                                                    <option value="@subcategory.Id">@subcategory.Name (@subcategory.CategoryName)</option>
+                                                }
+                                            }
+                                        </InputSelect>
+                                        <ValidationMessage For="@(() => updateProductDto.SubcategoryId)" />
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="price" class="form-label">Price</label>
+                                        <InputNumber id="price" class="form-control" @bind-Value="updateProductDto.Price" step="0.01" />
+                                        <ValidationMessage For="@(() => updateProductDto.Price)" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="d-flex justify-content-between">
+                                <button type="button" class="btn btn-secondary" @onclick="() => Navigation.NavigateTo('/products')">
+                                    <i class="fas fa-arrow-left"></i> Back to Products
+                                </button>
+                                <button type="submit" class="btn btn-primary" disabled="@submitting">
+                                    @if (submitting)
+                                    {
+                                        <span class="spinner-border spinner-border-sm me-2"></span>
+                                    }
+                                    <i class="fas fa-save"></i> Update Product
+                                </button>
+                            </div>
+                        </EditForm>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle"></i> Product not found.
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public int Id { get; set; }
+
+    private UpdateProductDto updateProductDto = new();
+    private List<SubcategoryDto> subcategories = new();
+    private bool loading = true;
+    private bool submitting = false;
+    private bool productFound = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadSubcategories();
+        await LoadProduct();
+    }
+
+    private async Task LoadSubcategories()
+    {
+        var result = await ProductService.GetSubcategoriesAsync();
+        if (result?.Success == true && result.Data != null)
+        {
+            subcategories = result.Data;
+        }
+    }
+
+    private async Task LoadProduct()
+    {
+        var result = await ProductService.GetByIdAsync(Id);
+
+        if (result?.Success == true && result.Data != null)
+        {
+            updateProductDto.Name = result.Data.Name;
+            updateProductDto.Description = result.Data.Description;
+            updateProductDto.SubcategoryId = result.Data.SubcategoryId;
+            updateProductDto.CostPrice = result.Data.CostPrice;
+            updateProductDto.SalePrice = result.Data.SalePrice;
+            //TODO add characteristics and image updateProductDto.
+            productFound = true;
+        }
+
+        loading = false;
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        submitting = true;
+        var result = await ProductService.UpdateAsync(Id, updateProductDto);
+
+        if (result?.Success == true)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", "Product updated successfully!");
+            Navigation.NavigateTo("/products");
+        }
+        else
+        {
+            await JSRuntime.InvokeVoidAsync("alert", $"Error updating product: {result?.Message}");
+        }
+
+        submitting = false;
+    }
+}

@@ -17,10 +17,12 @@ builder.Services.AddDbContext<PlanDiarioDbContext>(options =>
 // Add Services
 builder.Services.AddScoped<ICustomerService, CustomerService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
-builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<ILookupService, LookupService>();
 builder.Services.AddScoped<ICollectorService, CollectorService>();
 builder.Services.AddScoped<ISalesmanService, SalesmanService>();
+builder.Services.AddScoped<IPlanService, PlanService>();
+builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<IProductPlanService, ProductPlanService>();
 
 // Add CORS
 builder.Services.AddCors(options =>

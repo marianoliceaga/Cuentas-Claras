@@ -1,0 +1,142 @@
+﻿@page "/plans/{id:int}"
+@using PlanDiario.Application.DTOs
+@using PlanDiario.Frontend.Services
+@inject IPlanService PlanService
+@inject IProductPlanService ProductPlanService
+@inject NavigationManager Navigation
+
+<PageTitle>Plan Details</PageTitle>
+
+<div class="container">
+    @if (loading)
+    {
+        <div class="text-center">
+            <div class="spinner-border" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    }
+    else if (plan != null)
+    {
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h3>Plan Details</h3>
+                        <div>
+                            <button class="btn btn-warning me-2" @onclick="() => Navigation.NavigateTo('/plans/edit/{Id}')">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                            <button class="btn btn-success" @onclick="() => Navigation.NavigateTo('/plans/{Id}/products')">
+                                <i class="fas fa-box"></i> Manage Products
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <strong>ID:</strong> @plan.Id
+                            </div>
+                            <div class="col-md-6">
+                                <strong>Created:</strong> @plan.CreatedAt.ToString("dd/MM/yyyy HH:mm")
+                            </div>
+                        </div>
+                        <hr />
+                        <div class="mb-3">
+                            <strong>Name:</strong>
+                            <p>@plan.Name</p>
+                        </div>
+                        <div class="mb-3">
+                            <strong>Description:</strong>
+                            <p>@(string.IsNullOrEmpty(plan.Description) ? "No description provided" : plan.Description)</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Associated Products</h5>
+                    </div>
+                    <div class="card-body">
+                        @if (productPlans?.Any() == true)
+                        {
+                            <div class="list-group">
+                                @foreach (var productPlan in productPlans)
+                                {
+                                    <div class="list-group-item">
+                                        <div class="d-flex w-100 justify-content-between">
+                                            <h6 class="mb-1">@productPlan.ProductName</h6>
+                                            <small>Qty: @productPlan.Quantity</small>
+                                        </div>
+                                        @if (!string.IsNullOrEmpty(productPlan.Notes))
+                                        {
+                                            <p class="mb-1"><small>@productPlan.Notes</small></p>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <p class="text-muted">No products assigned to this plan.</p>
+                        }
+                        <div class="mt-3">
+                            <div class="col-auto">
+                                <NavLink class="btn btn-primary btn-sm w-100" href="/plans/@Id/products">
+                                    <i class="fas fa-plus"></i>  Add Products
+                                </NavLink>
+                            </div>
+                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-3">
+            <button class="btn btn-secondary" @onclick="() => Navigation.NavigateTo('/plans')">
+                <i class="fas fa-arrow-left"></i> Back to Plans
+            </button>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-danger">
+            <i class="fas fa-exclamation-triangle"></i> Plan not found.
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public int Id { get; set; }
+
+    private PlanDto? plan;
+    private List<ProductPlanDto> productPlans = new();
+    private bool loading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadPlan();
+        await LoadProductPlans();
+    }
+
+    private async Task LoadPlan()
+    {
+        var result = await PlanService.GetByIdAsync(Id);
+        if (result?.Success == true)
+        {
+            plan = result.Data;
+        }
+    }
+
+    private async Task LoadProductPlans()
+    {
+        var result = await ProductPlanService.GetByPlanIdAsync(Id);
+        if (result?.Success == true && result.Data != null)
+        {
+            productPlans = result.Data;
+        }
+        loading = false;
+    }
+}
