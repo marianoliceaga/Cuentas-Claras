@@ -14,7 +14,7 @@
             {
                 <div class="text-center">
                     <div class="spinner-border" role="status">
-                        <span class="visually-hidden">Loading...</span>
+                        <span class="visually-hidden">Cargando...</span>
                     </div>
                 </div>
             }
@@ -39,7 +39,7 @@
                             <DataAnnotationsValidator />
                             <ValidationSummary class="alert alert-danger" />
 
-                            <div class="mb-3">
+                            @* TODO review this <div class="mb-3">
                                 <label for="quantity" class="form-label">Quantity *</label>
                                 <InputNumber id="quantity" class="form-control" @bind-Value="updateProductPlanDto.Quantity" min="1" />
                                 <ValidationMessage For="@(() => updateProductPlanDto.Quantity)" />
@@ -50,24 +50,24 @@
                                         Total: $@((originalProductPlan.ProductPrice != 0 ? originalProductPlan.ProductPrice : 0) * updateProductPlanDto.Quantity)
                                     </div>
                                 }
-                            </div>
+                            </div> *@
 
-                            <div class="mb-3">
+                            @* <div class="mb-3">
                                 <label for="notes" class="form-label">Notes</label>
                                 <InputTextArea id="notes" class="form-control" rows="3" @bind-Value="updateProductPlanDto.Notes" />
                                 <ValidationMessage For="@(() => updateProductPlanDto.Notes)" />
-                            </div>
+                            </div> *@
 
                             <div class="d-flex justify-content-between">
-                                <button type="button" class="btn btn-secondary" @onclick="() => Navigation.NavigateTo('/productplans')">
-                                    <i class="fas fa-arrow-left"></i> Back to Product Plans
-                                </button>
+                                <NavLink type="button" class="btn btn-secondary" href="/productplans">
+                                    <i class="fas fa-arrow-left"></i> Vuelta a Articulos/Planes
+                                </NavLink>
                                 <button type="submit" class="btn btn-primary" disabled="@submitting">
                                     @if (submitting)
                                     {
                                         <span class="spinner-border spinner-border-sm me-2"></span>
                                     }
-                                    <i class="fas fa-save"></i> Update Product Plan
+                                    <i class="fas fa-save"></i> Actualizar Articulos/Planes
                                 </button>
                             </div>
                         </EditForm>

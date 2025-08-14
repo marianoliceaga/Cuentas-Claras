@@ -38,7 +38,7 @@
     {
         <div class="text-center">
             <div class="spinner-border" role="status">
-                <span class="visually-hidden">Loading...</span>
+                <span class="visually-hidden">Cargando...</span>
             </div>
         </div>
     }
@@ -67,17 +67,18 @@
                                     <td>@plan.CreatedAt.ToString("dd/MM/yyyy")</td>
                                     <td>
                                         <div class="btn-group" role="group">
-                                            <button class="btn btn-sm btn-info" @onclick="() => Navigation.NavigateTo('/plans/' + plan.Id)">
-                                                <i class="fas fa-eye"></i> View
-                                            </button>
-                                            <button class="btn btn-sm btn-warning" @onclick="() => Navigation.NavigateTo('/plans/edit/' + plan.Id)">
-                                                <i class="fas fa-edit"></i> Edit
-                                            </button>
-                                            <button class="btn btn-sm btn-success" @onclick="() => Navigation.NavigateTo('/plans/' + plan.Id + '/products')">
-                                                <i class="fas fa-box"></i> Products
-                                            </button>
+
+                                            <NavLink class="btn btn-sm btn-info" href="@($"/plans/{plan.Id}")">
+                                                <i class="fas fa-eye"></i> Ver
+                                            </NavLink>
+                                            <NavLink class="btn btn-sm btn-warning" href="@($"/plans/edit/{plan.Id}")">
+                                                <i class="fas fa-edit"></i> Editar
+                                            </NavLink>
+                                            <NavLink class="btn btn-sm btn-success" href="@($"/plans/{plan.Id}/products")">
+                                                <i class="fas fa-box"></i> Articulos
+                                            </NavLink>
                                             <button class="btn btn-sm btn-danger" @onclick="() => DeletePlan(plan.Id)">
-                                                <i class="fas fa-trash"></i> Delete
+                                                <i class="fas fa-trash"></i> Borrar
                                             </button>
                                         </div>
                                     </td>

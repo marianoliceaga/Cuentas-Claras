@@ -12,7 +12,7 @@
     {
         <div class="text-center">
             <div class="spinner-border" role="status">
-                <span class="visually-hidden">Loading...</span>
+                <span class="visually-hidden">Cargando...</span>
             </div>
         </div>
     }
@@ -22,14 +22,16 @@
             <div class="col-md-8">
                 <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center">
-                        <h3>Plan Details</h3>
+                        <h3>Detalles del Plan</h3>
                         <div>
-                            <button class="btn btn-warning me-2" @onclick="() => Navigation.NavigateTo('/plans/edit/{Id}')">
-                                <i class="fas fa-edit"></i> Edit
-                            </button>
-                            <button class="btn btn-success" @onclick="() => Navigation.NavigateTo('/plans/{Id}/products')">
-                                <i class="fas fa-box"></i> Manage Products
-                            </button>
+                            <NavLink class="btn btn-warning me-2" href="@($"/plans/edit/{plan.Id}")">
+                                <i class="fas fa-edit"></i> Editar
+                            </NavLink>
+
+                            <NavLink class="btn btn-success" href="@($"/plans/{plan.Id}/products")">
+                                <i class="fas fa-box"></i> Administrar Articulos
+                            </NavLink>
+
                         </div>
                     </div>
                     <div class="card-body">
@@ -56,7 +58,7 @@
             <div class="col-md-4">
                 <div class="card">
                     <div class="card-header">
-                        <h5>Associated Products</h5>
+                        <h5>Articulos Asociados</h5>
                     </div>
                     <div class="card-body">
                         @if (productPlans?.Any() == true)
@@ -81,10 +83,11 @@
                         {
                             <p class="text-muted">No products assigned to this plan.</p>
                         }
+
                         <div class="mt-3">
                             <div class="col-auto">
-                                <NavLink class="btn btn-primary btn-sm w-100" href="/plans/@Id/products">
-                                    <i class="fas fa-plus"></i>  Add Products
+                                <NavLink class="btn btn-primary btn-sm w-100" href="@($"/plans/{plan.Id}/products")">
+                                    <i class="fas fa-plus"></i>  Agregar Articulos
                                 </NavLink>
                             </div>
                             
@@ -95,15 +98,15 @@
         </div>
 
         <div class="mt-3">
-            <button class="btn btn-secondary" @onclick="() => Navigation.NavigateTo('/plans')">
-                <i class="fas fa-arrow-left"></i> Back to Plans
-            </button>
+            <NavLink class="btn btn-secondary" href="/plans">
+                <i class="fas fa-arrow-left"></i> Vuelta a Planes
+            </NavLink>
         </div>
     }
     else
     {
         <div class="alert alert-danger">
-            <i class="fas fa-exclamation-triangle"></i> Plan not found.
+            <i class="fas fa-exclamation-triangle"></i> Plan no encontrado.
         </div>
     }
 </div>

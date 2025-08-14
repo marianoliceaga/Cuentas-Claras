@@ -14,7 +14,7 @@
             {
                 <div class="text-center">
                     <div class="spinner-border" role="status">
-                        <span class="visually-hidden">Loading...</span>
+                        <span class="visually-hidden">Cargando...</span>
                     </div>
                 </div>
             }
@@ -51,7 +51,7 @@
                                             {
                                                 @foreach (var subcategory in subcategories)
                                                 {
-                                                    <option value="@subcategory.Id">@subcategory.Name (@subcategory.CategoryName)</option>
+                                                    <option value="@subcategory.Id">@subcategory.Name (@subcategory.Category.Name)</option>
                                                 }
                                             }
                                         </InputSelect>
@@ -61,22 +61,29 @@
                                 <div class="col-md-6">
                                     <div class="mb-3">
                                         <label for="price" class="form-label">Price</label>
-                                        <InputNumber id="price" class="form-control" @bind-Value="updateProductDto.Price" step="0.01" />
-                                        <ValidationMessage For="@(() => updateProductDto.Price)" />
+                                        <InputNumber id="price" class="form-control" @bind-Value="updateProductDto.SalePrice" step="1.0" />
+                                        <ValidationMessage For="@(() => updateProductDto.SalePrice)" />
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="price" class="form-label">Price</label>
+                                        <InputNumber id="price" class="form-control" @bind-Value="updateProductDto.CostPrice" step="1.0" />
+                                        <ValidationMessage For="@(() => updateProductDto.CostPrice)" />
                                     </div>
                                 </div>
                             </div>
 
                             <div class="d-flex justify-content-between">
-                                <button type="button" class="btn btn-secondary" @onclick="() => Navigation.NavigateTo('/products')">
-                                    <i class="fas fa-arrow-left"></i> Back to Products
-                                </button>
+                                <NavLink type="button" class="btn btn-secondary" href="@($"/products")">
+                                    <i class="fas fa-arrow-left"></i> Vuelta a Artículos
+                                </NavLink>
                                 <button type="submit" class="btn btn-primary" disabled="@submitting">
                                     @if (submitting)
                                     {
                                         <span class="spinner-border spinner-border-sm me-2"></span>
                                     }
-                                    <i class="fas fa-save"></i> Update Product
+                                    <i class="fas fa-save"></i> Actualizar Artículo
                                 </button>
                             </div>
                         </EditForm>
@@ -86,7 +93,7 @@
             else
             {
                 <div class="alert alert-danger">
-                    <i class="fas fa-exclamation-triangle"></i> Product not found.
+                    <i class="fas fa-exclamation-triangle"></i> Articulo no encontrado.
                 </div>
             }
         </div>

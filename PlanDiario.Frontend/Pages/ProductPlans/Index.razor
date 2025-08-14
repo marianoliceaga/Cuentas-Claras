@@ -15,15 +15,15 @@
             <h1>Product Plans Management</h1>
         </div>
         <div class="col-auto">
-            @* <button class="btn btn-primary" @onclick="() => Navigation.NavigateTo('/productplans/create')">
+            <NavLink class="btn btn-primary" href="/productplans/create">
                 <i class="fas fa-plus"></i> Create New Product Plan
-            </button> *@
+            </NavLink>
         </div>
     </div>
 
     <div class="row mb-3">
         <div class="col-md-4">
-            <select class="form-select" @bind="selectedPlanId" @onchange="OnPlanFilterChange">
+            <select class="form-select" @bind="selectedPlanId" @bind:event="oninput" @onchange="OnPlanFilterChange">
                 <option value="">All Plans</option>
                 @if (plans?.Any() == true)
                 {
@@ -35,7 +35,7 @@
             </select>
         </div>
         <div class="col-md-4">
-            <select class="form-select" @bind="selectedProductId" @onchange="OnProductFilterChange">
+            <select class="form-select" @bind="selectedProductId" @bind:event="oninput" @onchange="OnProductFilterChange">
                 <option value="">All Products</option>
                 @if (products?.Any() == true)
                 {
@@ -52,7 +52,7 @@
     {
         <div class="text-center">
             <div class="spinner-border" role="status">
-                <span class="visually-hidden">Loading...</span>
+                <span class="visually-hidden">Cargando...</span>
             </div>
         </div>
     }
@@ -89,12 +89,12 @@
                                     <td>@productPlan.Notes</td>
                                     <td>
                                         <div class="btn-group" role="group">
-                                            <button class="btn btn-sm btn-info" @onclick="() => Navigation.NavigateTo('/productplans/{productPlan.Id}')">
-                                                <i class="fas fa-eye"></i> View
-                                            </button>
-                                            <button class="btn btn-sm btn-warning" @onclick="() => Navigation.NavigateTo('/productplans/edit/{productPlan.Id}')">
-                                                <i class="fas fa-edit"></i> Edit
-                                            </button>
+                                            <NavLink class="btn btn-sm btn-info" href="@($"/productplans/{productPlan.Id}")">
+                                                <i class="fas fa-eye"></i> Ver
+                                            </NavLink>
+                                            <NavLink class="btn btn-sm btn-warning" href="@($"/productplans/edit/{productPlan.Id}")">
+                                                <i class="fas fa-edit"></i> Editar
+                                            </NavLink>
                                             <button class="btn btn-sm btn-danger" @onclick="() => DeleteProductPlan(productPlan.Id)">
                                                 <i class="fas fa-trash"></i> Delete
                                             </button>
