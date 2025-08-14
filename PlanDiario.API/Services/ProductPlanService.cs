@@ -20,7 +20,7 @@ namespace PlanDiario.API.Services
             var query = _context.ProductPlans
                 .Include(pp => pp.Plan)
                 .Include(pp => pp.Product)
-                    .ThenInclude(p => p.Subcategory)
+                    .ThenInclude(p => p.Subcategory).ThenInclude(p => p.Category).ThenInclude(c => c.Line)
                 .AsQueryable();
 
             if (planId.HasValue)
@@ -183,7 +183,7 @@ namespace PlanDiario.API.Services
                     {
                         Id = productPlan.Product.Subcategory.Id,
                         Name = productPlan.Product.Subcategory.Name
-                    } : null
+                    } : null,
                 } : null
             };
         }

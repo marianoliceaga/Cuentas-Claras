@@ -35,9 +35,10 @@
                 {
                     @foreach (var subcategory in subcategories)
                     {
-                        <option value="@subcategory.Id">@subcategory.Name (@subcategory.Category.Name)</option>
+                        <option value="@subcategory.Id">@subcategory.Name</option>
                     }
                 }
+                <!--TODO (@subcategory.Category.Name)-->
             </select>
         </div>
     </div>
