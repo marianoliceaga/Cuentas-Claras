@@ -7,16 +7,16 @@
 @inject NavigationManager Navigation
 @inject IJSRuntime JSRuntime
 
-<PageTitle>Product Plans Management</PageTitle>
+<PageTitle>Administración de Artículos/Planes</PageTitle>
 
 <div class="container-fluid">
     <div class="row mb-3">
         <div class="col">
-            <h1>Product Plans Management</h1>
+            <h1>Administración de Artículos/Planes</h1>
         </div>
         <div class="col-auto">
             <NavLink class="btn btn-primary" href="/productplans/create">
-                <i class="fas fa-plus"></i> Create New Product Plan
+                <i class="fas fa-plus"></i> Crear nuevo Artículo/Plan
             </NavLink>
         </div>
     </div>
@@ -24,7 +24,7 @@
     <div class="row mb-3">
         <div class="col-md-4">
             <select class="form-select" @bind="selectedPlanId" @bind:event="oninput" @onchange="OnPlanFilterChange">
-                <option value="">All Plans</option>
+                <option value="">Tddos Los Planes</option>
                 @if (plans?.Any() == true)
                 {
                     @foreach (var plan in plans)
@@ -36,7 +36,7 @@
         </div>
         <div class="col-md-4">
             <select class="form-select" @bind="selectedProductId" @bind:event="oninput" @onchange="OnProductFilterChange">
-                <option value="">All Products</option>
+                <option value="">Todos los Artículos</option>
                 @if (products?.Any() == true)
                 {
                     @foreach (var product in products)
@@ -66,13 +66,13 @@
                             <tr>
                                 <th>ID</th>
                                 <th>Plan</th>
-                                <th>Product</th>
-                                <th>Category</th>
-                                <th>Quantity</th>
-                                <th>Unit Price</th>
+                                <th>Artículo</th>
+                                <th>Categoría</th>
+                                <th>Cantidad</th>
+                                <th>Precio Unitario</th>
                                 <th>Total</th>
-                                <th>Notes</th>
-                                <th>Actions</th>
+                                <th>Notas</th>
+                                <th>Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -109,10 +109,10 @@
                 @* Pagination *@
                 @if (totalPages > 1)
                 {
-                    <nav aria-label="Product Plans pagination">
+                    <nav aria-label="Paginación">
                         <ul class="pagination justify-content-center">
                             <li class="page-item @(currentPage == 1 ? "disabled" : "")">
-                                <button class="page-link" @onclick="() => LoadPage(currentPage - 1)" disabled="@(currentPage == 1)">Previous</button>
+                                <button class="page-link" @onclick="() => LoadPage(currentPage - 1)" disabled="@(currentPage == 1)">Previos</button>
                             </li>
                             @for (int i = 1; i <= totalPages; i++)
                             {
@@ -122,7 +122,7 @@
                                 </li>
                             }
                             <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
-                                <button class="page-link" @onclick="() => LoadPage(currentPage + 1)" disabled="@(currentPage == totalPages)">Next</button>
+                                <button class="page-link" @onclick="() => LoadPage(currentPage + 1)" disabled="@(currentPage == totalPages)">Próximos</button>
                             </li>
                         </ul>
                     </nav>
@@ -131,10 +131,10 @@
                 @* Summary *@
                 <div class="row mt-3">
                     <div class="col-md-6">
-                        <strong>Total Items: @productPlans.Sum(pp => pp.Quantity)</strong>
+                        <strong>Total de Items: @productPlans.Sum(pp => pp.Quantity)</strong>
                     </div>
                     <div class="col-md-6 text-end">
-                        <strong>Total Value: $@productPlans.Sum(pp => (pp.ProductPrice != 0 ? pp.ProductPrice : 0) * pp.Quantity).ToString("F2")</strong>
+                        <strong>Valor Total: $@productPlans.Sum(pp => (pp.ProductPrice != 0 ? pp.ProductPrice : 0) * pp.Quantity).ToString("F2")</strong>
                     </div>
                 </div>
             </div>
@@ -143,7 +143,7 @@
     else
     {
         <div class="alert alert-info">
-            <i class="fas fa-info-circle"></i> No product plans found.
+            <i class="fas fa-info-circle"></i> No se encontraron relaciones de productos/planes.
         </div>
     }
 </div>
@@ -227,17 +227,17 @@
 
     private async Task DeleteProductPlan(int id)
     {
-        if (await JSRuntime.InvokeAsync<bool>("confirm", "Are you sure you want to delete this product plan?"))
+        if (await JSRuntime.InvokeAsync<bool>("confirm", "Estás seguro que deseas borrar esta relación?"))
         {
             var result = await ProductPlanService.DeleteAsync(id);
             if (result?.Success == true)
             {
                 await LoadProductPlans();
-                await JSRuntime.InvokeVoidAsync("alert", "Product plan deleted successfully!");
+                await JSRuntime.InvokeVoidAsync("alert", "Relación borrada exitosamente!");
             }
             else
             {
-                await JSRuntime.InvokeVoidAsync("alert", $"Error deleting product plan: {result?.Message}");
+                await JSRuntime.InvokeVoidAsync("alert", $"Error borrando relación: {result?.Message}");
             }
         }
     }

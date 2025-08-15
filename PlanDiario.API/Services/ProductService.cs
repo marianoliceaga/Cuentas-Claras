@@ -17,7 +17,7 @@ namespace PlanDiario.API.Services
 
         public async Task<PagedResult<ProductDto>> GetAllAsync(int pageNumber = 1, int pageSize = 10, string? searchTerm = null, int? subcategoryId = null)
         {
-            var query = _context.Products.Include(p => p.Subcategory).AsQueryable();
+            var query = _context.Products.Include(p => p.Subcategory).ThenInclude(p => p.Category).AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(searchTerm))
             {
@@ -51,7 +51,7 @@ namespace PlanDiario.API.Services
         public async Task<ProductDto?> GetByIdAsync(int id)
         {
             var product = await _context.Products
-                .Include(p => p.Subcategory)
+                .Include(p => p.Subcategory).ThenInclude(p => p.Category)
                 .FirstOrDefaultAsync(p => p.Id == id);
             return product == null ? null : MapToProductDto(product);
         }
@@ -141,7 +141,13 @@ namespace PlanDiario.API.Services
                 Subcategory = product.Subcategory != null ? new SubcategoryDto
                 {
                     Id = product.Subcategory.Id,
-                    Name = product.Subcategory.Name
+                    Name = product.Subcategory.Name,
+                    Category = product.Subcategory.Category != null ? new CategoryDto
+                    {
+                        Id = product.Subcategory.Category.Id,
+                        Name = product.Subcategory.Category.Name,
+                        LineId = product.Subcategory.Category.LineId // Explicitly casted to int
+                    } : null
                 } : null
             };
         }

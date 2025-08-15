@@ -7,14 +7,14 @@
 @inject NavigationManager Navigation
 @inject IJSRuntime JSRuntime
 
-<PageTitle>Create Product Plan</PageTitle>
+<PageTitle>Crear Artículo/Plan</PageTitle>
 
 <div class="container">
     <div class="row">
         <div class="col-md-8 mx-auto">
             <div class="card">
                 <div class="card-header">
-                    <h3>Create New Product Plan</h3>
+                    <h3>Crear Artículo/Plan</h3>
                 </div>
                 <div class="card-body">
                     @if (loading)
@@ -52,7 +52,7 @@
                                     <div class="mb-3">
                                         <label for="product" class="form-label">Product *</label>
                                         <InputSelect id="product" class="form-select" @bind-Value="createProductPlanDto.ProductId" @onchange="OnProductChange">
-                                            <option value="">Select a product</option>
+                                            <option value="">Elige un artículo</option>
                                             @if (availableProducts?.Any() == true)
                                             {
                                                 @foreach (var product in availableProducts)
@@ -76,7 +76,7 @@
                             @if (selectedPlan != null)
                             {
                                 <div class="alert alert-info">
-                                    <strong>Selected Plan:</strong> @selectedPlan.Name<br />
+                                    <strong>Plan Seleccionado:</strong> @selectedPlan.Name<br />
                                     <small>@selectedPlan.Description</small>
                                 </div>
                             }
@@ -84,9 +84,9 @@
                             @if (selectedProduct != null)
                             {
                                 <div class="alert alert-success">
-                                    <strong>Selected Product:</strong> @selectedProduct.Name<br />
-                                    <small>
-                                        Category:
+                                    <strong>Artículo Seleccionado:</strong> @selectedProduct.Name<br />
+                                    <small> 
+                                        Categoría:
                                         @if (selectedProduct.Subcategory?.Category != null)
                                         {
                                             @selectedProduct.Subcategory.Category.Name
@@ -102,7 +102,7 @@
                             }
 
                             <div class="mb-3">
-                                <label for="quantity" class="form-label">Quantity *</label>
+                                <label for="quantity" class="form-label">Cantidad *</label>
                                 <InputNumber id="quantity" class="form-control" @bind-Value="quantity" min="1" />
                                 <ValidationMessage For="@(() => quantity)" />
 
@@ -116,14 +116,14 @@
 
                             <div class="d-flex justify-content-between">
                                 <button type="button" class="btn btn-secondary" @onclick='() => Navigation.NavigateTo("/productplans")'>
-                                    <i class="fas fa-arrow-left"></i> Back to Product Plans
+                                    <i class="fas fa-arrow-left"></i> Vuelta a Artículos/Productos
                                 </button>
                                 <button type="submit" class="btn btn-primary" disabled="@submitting">
                                     @if (submitting)
                                     {
                                         <span class="spinner-border spinner-border-sm me-2"></span>
                                     }
-                                    <i class="fas fa-save"></i> Create Product Plan
+                                    <i class="fas fa-save"></i> Crear Artículo/Plan
                                 </button>
                             </div>
                         </EditForm>
@@ -246,12 +246,12 @@
 
         if (result?.Success == true)
         {
-            await JSRuntime.InvokeVoidAsync("alert", "Product plan created successfully!");
+            await JSRuntime.InvokeVoidAsync("alert", "Relación creada exitosamente!");
             Navigation.NavigateTo("/productplans");
         }
         else
         {
-            await JSRuntime.InvokeVoidAsync("alert", $"Error creating product plan: {result?.Message}");
+            await JSRuntime.InvokeVoidAsync("alert", $"Error creando relación: {result?.Message}");
         }
 
         submitting = false;

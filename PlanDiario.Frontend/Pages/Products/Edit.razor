@@ -5,7 +5,7 @@
 @inject NavigationManager Navigation
 @inject IJSRuntime JSRuntime
 
-<PageTitle>Edit Product</PageTitle>
+<PageTitle>Editar Artículo</PageTitle>
 
 <div class="container">
     <div class="row">
@@ -22,7 +22,7 @@
             {
                 <div class="card">
                     <div class="card-header">
-                        <h3>Edit Product</h3>
+                        <h3>Editar Artículo</h3>
                     </div>
                     <div class="card-body">
                         <EditForm Model="updateProductDto" OnValidSubmit="HandleValidSubmit">
@@ -30,13 +30,13 @@
                             <ValidationSummary class="alert alert-danger" />
 
                             <div class="mb-3">
-                                <label for="name" class="form-label">Name *</label>
+                                <label for="name" class="form-label">Nombre *</label>
                                 <InputText id="name" class="form-control" @bind-Value="updateProductDto.Name" />
                                 <ValidationMessage For="@(() => updateProductDto.Name)" />
                             </div>
 
                             <div class="mb-3">
-                                <label for="description" class="form-label">Description</label>
+                                <label for="description" class="form-label">Descripción</label>
                                 <InputTextArea id="description" class="form-control" rows="3" @bind-Value="updateProductDto.Description" />
                                 <ValidationMessage For="@(() => updateProductDto.Description)" />
                             </div>
@@ -44,14 +44,14 @@
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="mb-3">
-                                        <label for="subcategory" class="form-label">Subcategory *</label>
+                                        <label for="subcategory" class="form-label">Subcategoría *</label>
                                         <InputSelect id="subcategory" class="form-select" @bind-Value="updateProductDto.SubcategoryId">
-                                            <option value="">Select a subcategory</option>
+                                            <option value="">Elige una subcategoría</option>
                                             @if (subcategories?.Any() == true)
                                             {
                                                 @foreach (var subcategory in subcategories)
                                                 {
-                                                    <option value="@subcategory.Id">@subcategory.Name (@subcategory.Category.Name)</option>
+                                                    <option value="@subcategory.Id">@subcategory.Name</option>
                                                 }
                                             }
                                         </InputSelect>
@@ -60,14 +60,14 @@
                                 </div>
                                 <div class="col-md-6">
                                     <div class="mb-3">
-                                        <label for="price" class="form-label">Price</label>
+                                        <label for="price" class="form-label">Precio de Venta</label>
                                         <InputNumber id="price" class="form-control" @bind-Value="updateProductDto.SalePrice" step="1.0" />
                                         <ValidationMessage For="@(() => updateProductDto.SalePrice)" />
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="mb-3">
-                                        <label for="price" class="form-label">Price</label>
+                                        <label for="price" class="form-label">Precio de Compra</label>
                                         <InputNumber id="price" class="form-control" @bind-Value="updateProductDto.CostPrice" step="1.0" />
                                         <ValidationMessage For="@(() => updateProductDto.CostPrice)" />
                                     </div>
@@ -149,12 +149,12 @@
 
         if (result?.Success == true)
         {
-            await JSRuntime.InvokeVoidAsync("alert", "Product updated successfully!");
+            await JSRuntime.InvokeVoidAsync("alert", "Artículo actualizado exitosamente!");
             Navigation.NavigateTo("/products");
         }
         else
         {
-            await JSRuntime.InvokeVoidAsync("alert", $"Error updating product: {result?.Message}");
+            await JSRuntime.InvokeVoidAsync("alert", $"Error actualizando artículo: {result?.Message}");
         }
 
         submitting = false;
