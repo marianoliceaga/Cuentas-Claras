@@ -27,7 +27,7 @@
         <div class="col-md-6">
             <div class="input-group">
                 <input type="text" class="form-control" placeholder="Buscar planes..." @bind="searchTerm" @onkeypress="OnSearchKeyPress" />
-                <button class="btn btn-outline-secondary" type="button" @onclick="SearchPlans">
+                <button class="btn btn-outline-primary" type="button" @onclick="SearchPlans">
                     <i class="fas fa-search"></i>
                 </button>
             </div>
@@ -52,8 +52,9 @@
                             <tr>
                                 <th>ID</th>
                                 <th>Nombre</th>
-                                <th>Tasa de Interés</th>
                                 <th>Fecha de Creación</th>
+                                <th>Tasa de Finalización</th>
+                                <th>Tasa de Interés</th>
                                 <th>Acciones</th>
                             </tr>
                         </thead>
@@ -63,8 +64,9 @@
                                 <tr>
                                     <td>@plan.Id</td>
                                     <td>@plan.Name</td>
-                                    <td>@plan.InterestRate</td>
                                     <td>@plan.StartDate.ToString("dd/MM/yyyy")</td>
+                                    <td>@plan.EndDate.ToString("dd/MM/yyyy")</td>
+                                    <td>@plan.InterestRate</td>
                                     <td>
                                         <div class="btn-group" role="group">
 
@@ -73,9 +75,6 @@
                                             </NavLink>
                                             <NavLink class="btn btn-sm btn-warning" href="@($"/plans/edit/{plan.Id}")">
                                                 <i class="fas fa-edit"></i> Editar
-                                            </NavLink>
-                                            <NavLink class="btn btn-sm btn-success" href="@($"/plans/{plan.Id}/products")">
-                                                <i class="fas fa-box"></i> Articulos
                                             </NavLink>
                                             <button class="btn btn-sm btn-danger" @onclick="() => DeletePlan(plan.Id)">
                                                 <i class="fas fa-trash"></i> Borrar

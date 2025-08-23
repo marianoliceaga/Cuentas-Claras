@@ -20,22 +20,33 @@
                         <ValidationSummary class="alert alert-danger" />
 
                         <div class="mb-3">
-                            <label for="name" class="form-label">Name *</label>
+                            <label for="name" class="form-label">Nombre *</label>
                             <InputText id="name" class="form-control" @bind-Value="createPlanDto.Name" />
                             <ValidationMessage For="@(() => createPlanDto.Name)" />
                         </div>
 
-                        <!--TODO add oter properties-->
+                        <div class="mb-3">
+                            <label for="createDate" class="form-label">Fecha de Creación *</label>
+                            <InputDate id="createDate" class="form-control" @bind-Value="createPlanDto.StartDate" />
+                            <ValidationMessage For="@(() => createPlanDto.StartDate)" />
+                        </div>
 
-                        @* <div class="mb-3">
-                            <label for="description" class="form-label">Description</label>
-                            <InputTextArea id="description" class="form-control" rows="4" @bind-Value="createPlanDto.Description" />
-                            <ValidationMessage For="@(() => createPlanDto.Description)" />
-                        </div> *@
+                        <div class="mb-3">
+                            <label for="createDate" class="form-label">Fecha de Finalización *</label>
+                            <InputDate id="endDate" class="form-control" @bind-Value="createPlanDto.EndDate" />
+                            <ValidationMessage For="@(() => createPlanDto.EndDate)" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Tasa de Interés *</label>
+                            <InputNumber id="name" class="form-control" @bind-Value="createPlanDto.InterestRate" />
+                            <ValidationMessage For="@(() => createPlanDto.InterestRate)" />
+                        </div>
+                        
 
                         <div class="d-flex justify-content-between">
                             <NavLink class="btn btn-secondary" href="/plans/">
-                                <i class="fas fa-arrow-left"></i> Back to Plans
+                                <i class="fas fa-arrow-left"></i> Vuelta a Planes
                             </NavLink>
 
                             <button type="submit" class="btn btn-primary" disabled="@loading">
@@ -43,7 +54,7 @@
                                 {
                                     <span class="spinner-border spinner-border-sm me-2"></span>
                                 }
-                                <i class="fas fa-save"></i> Create Plan
+                                <i class="fas fa-save"></i> Crear Plan
                             </button>
                         </div>
                     </EditForm>

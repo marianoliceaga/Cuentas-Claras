@@ -28,11 +28,10 @@
                                 <i class="fas fa-edit"></i> Editar
                             </NavLink>
 
-                            <NavLink class="btn btn-success" href="@($"/plans/{plan.Id}/products")">
+                            @* <NavLink class="btn btn-success" href="@($"/plans/{plan.Id}/products")">
                                 <i class="fas fa-box"></i> Administrar Articulos
-                            </NavLink>
-
-                        </div>
+                            </NavLink> *@
+S                       </div>
                     </div>
                     <div class="card-body">
                         <div class="row">
@@ -40,17 +39,21 @@
                                 <strong>ID:</strong> @plan.Id
                             </div>
                             <div class="col-md-6">
-                                <strong>Created:</strong> @plan.CreatedAt.ToString("dd/MM/yyyy HH:mm")
+                                <strong>Fecha de Creación:</strong> @plan.CreatedAt.ToString("dd/MM/yyyy")
+                            </div>
+                            <div class="col-md-6">
+                                <strong>Fecha de Finalización:</strong> @plan.EndDate.ToString("dd/MM/yyyy")
                             </div>
                         </div>
                         <hr />
                         <div class="mb-3">
-                            <strong>Name:</strong>
+                            <strong>Nombre:</strong>
                             <p>@plan.Name</p>
                         </div>
+                        <hr />
                         <div class="mb-3">
-                            <strong>Description:</strong>
-                            <p>@(string.IsNullOrEmpty(plan.Description) ? "No description provided" : plan.Description)</p>
+                            <strong>Tasa de Interés:</strong>
+                            <p>@plan.InterestRate</p>
                         </div>
                     </div>
                 </div>
@@ -69,7 +72,7 @@
                                     <div class="list-group-item">
                                         <div class="d-flex w-100 justify-content-between">
                                             <h6 class="mb-1">@productPlan.ProductName</h6>
-                                            <small>Qty: @productPlan.Quantity</small>
+                                            @* <small>Qty: @productPlan.Quantity</small> *@
                                         </div>
                                     </div>
                                 }
@@ -77,7 +80,7 @@
                         }
                         else
                         {
-                            <p class="text-muted">No products assigned to this plan.</p>
+                            <p class="text-muted">Sin artículos asignados a este plan.</p>
                         }
 
                         <div class="mt-3">

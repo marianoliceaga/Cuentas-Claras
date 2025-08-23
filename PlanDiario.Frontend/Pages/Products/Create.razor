@@ -1,6 +1,8 @@
 ﻿@page "/products/create"
 @using PlanDiario.Application.DTOs
 @using PlanDiario.Frontend.Services
+@using System.Text.Json.Nodes
+@using System.Text.Json
 @inject IProductService ProductService
 @inject NavigationManager Navigation
 @inject IJSRuntime JSRuntime
@@ -12,7 +14,7 @@
         <div class="col-md-8 mx-auto">
             <div class="card">
                 <div class="card-header">
-                    <h3>Create New Product</h3>
+                    <h3>Crear Nuevo Artículo</h3>
                 </div>
                 <div class="card-body">
                     @if (loading)
@@ -30,23 +32,36 @@
                             <ValidationSummary class="alert alert-danger" />
 
                             <div class="mb-3">
-                                <label for="name" class="form-label">Name *</label>
+                                <label for="name" class="form-label">Nombre *</label>
                                 <InputText id="name" class="form-control" @bind-Value="createProductDto.Name" />
                                 <ValidationMessage For="@(() => createProductDto.Name)" />
                             </div>
 
                             <div class="mb-3">
-                                <label for="description" class="form-label">Description</label>
+                                <label for="description" class="form-label">Descripción</label>
                                 <InputTextArea id="description" class="form-control" rows="3" @bind-Value="createProductDto.Description" />
                                 <ValidationMessage For="@(() => createProductDto.Description)" />
                             </div>
 
+                            <div class="mb-3">
+                                <label for="description" class="form-label">Características</label>
+                                <JsonEditor Node="Root" OnChanged="UpdateJson" />
+
+                                <br />
+                                <button class="btn btn-primary" @onclick="Save">Guardar Características</button>
+
+                                @if (!string.IsNullOrEmpty(JsonOutput))
+                                {
+                                    <h4>JSON Resultante</h4>
+                                    <pre>@JsonOutput</pre>
+                                }
+                            </div>
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="mb-3">
-                                        <label for="subcategory" class="form-label">Subcategory *</label>
+                                        <label for="subcategory" class="form-label">Subcategoría *</label>
                                         <InputSelect id="subcategory" class="form-select" @bind-Value="createProductDto.SubcategoryId">
-                                            <option value="">Select a subcategory</option>
+                                            <option value="">Seleccione una subcategoría</option>
                                             @if (subcategories?.Any() == true)
                                             {
                                                 @foreach (var subcategory in subcategories)
@@ -60,9 +75,9 @@
                                 </div>
                                 <div class="col-md-6">
                                     <div class="mb-3">
-                                        <label for="price" class="form-label">Price</label>
-                                        <InputNumber id="price" class="form-control" @bind-Value="createProductDto.CostPrice" step="1.00" />
-                                        <ValidationMessage For="@(() => createProductDto.CostPrice)" />
+                                        <label for="price" class="form-label">Precio de Venta</label>
+                                        <InputNumber id="price" class="form-control" @bind-Value="createProductDto.SalePrice" step="1.00" />
+                                        <ValidationMessage For="@(() => createProductDto.SalePrice)" />
                                     </div>
                                 </div>
                             </div>
@@ -88,6 +103,21 @@
 </div>
 
 @code {
+    private JsonNode Root = JsonNode.Parse(@"{
+      ""Caracteristicas"": { ""Color"": ""Azul"", ""Tamaño"": ""Grande"" },
+      ""EnStock"": ""Si"",
+      ""Transportable"": ""Si"",
+      ""Marca/Modelo"": [ ""Siam"", ""Queseyo"" ]
+    }")!;
+
+    private string JsonOutput = string.Empty;
+
+    private void UpdateJson() =>
+        JsonOutput = Root.ToJsonString(new JsonSerializerOptions { WriteIndented = true });
+
+    private void Save() => UpdateJson();
+
+
     private CreateProductDto createProductDto = new();
     private List<SubcategoryDto> subcategories = new();
     private bool loading = true;

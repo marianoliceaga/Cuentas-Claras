@@ -1,0 +1,401 @@
+@page "/"
+@using PlanDiario.Application.DTOs
+@using PlanDiario.Frontend.Services
+@inject IPlanService PlanService
+@inject IProductService ProductService
+@inject IProductPlanService ProductPlanService
+@inject IJSRuntime JSRuntime
+
+<PageTitle>Dashboard - PlanDiario</PageTitle>
+
+<div class="container-fluid">
+    <!-- Welcome Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="welcome-header">
+                <h2><i class="fas fa-tachometer-alt me-3"></i>Dashboard</h2>
+                <p class="lead mb-0">Welcome to PlanDiario Management System</p>
+            </div>
+        </div>
+    </div>
+
+    @if (loading)
+    {
+        <div class="text-center p-5">
+            <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
+                <span class="visually-hidden">Loading dashboard...</span>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- Statistics Cards -->
+        <div class="row g-4 mb-5">
+            <div class="col-lg-3 col-md-6">
+                <div class="card stat-card stat-card-primary">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h3 class="stat-number">@totalPlans</h3>
+                                <p class="stat-label">Total Plans</p>
+                            </div>
+                            <div class="stat-icon">
+                                <i class="fas fa-calendar-alt"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6">
+                <div class="card stat-card stat-card-success">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h3 class="stat-number">@totalProducts</h3>
+                                <p class="stat-label">Total Products</p>
+                            </div>
+                            <div class="stat-icon">
+                                <i class="fas fa-box"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6">
+                <div class="card stat-card stat-card-info">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h3 class="stat-number">@totalRelationships</h3>
+                                <p class="stat-label">Product-Plan Links</p>
+                            </div>
+                            <div class="stat-icon">
+                                <i class="fas fa-link"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6">
+                <div class="card stat-card stat-card-warning">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h3 class="stat-number">@activePlans</h3>
+                                <p class="stat-label">Active Plans</p>
+                            </div>
+                            <div class="stat-icon">
+                                <i class="fas fa-play-circle"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0"><i class="fas fa-bolt me-2"></i>Quick Actions</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-lg-3 col-md-6">
+                                <a href="/plans" class="btn btn-outline-primary w-100 quick-action-btn">
+                                    <i class="fas fa-plus-circle me-2"></i>
+                                    <span>Create New Plan</span>
+                                </a>
+                            </div>
+                            <div class="col-lg-3 col-md-6">
+                                <a href="/products" class="btn btn-outline-success w-100 quick-action-btn">
+                                    <i class="fas fa-box me-2"></i>
+                                    <span>Add New Product</span>
+                                </a>
+                            </div>
+                            <div class="col-lg-3 col-md-6">
+                                <a href="/productplans" class="btn btn-outline-info w-100 quick-action-btn">
+                                    <i class="fas fa-link me-2"></i>
+                                    <span>Link Product to Plan</span>
+                                </a>
+                            </div>
+                            <div class="col-lg-3 col-md-6">
+                                <a href="/reports/plans" class="btn btn-outline-warning w-100 quick-action-btn">
+                                    <i class="fas fa-chart-line me-2"></i>
+                                    <span>View Reports</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0"><i class="fas fa-calendar-alt me-2"></i>Recent Plans</h5>
+                    </div>
+                    <div class="card-body">
+                        @if (recentPlans.Any())
+                        {
+                            <div class="list-group list-group-flush">
+                                @foreach (var plan in recentPlans.Take(5))
+                                {
+                                    <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                        <div>
+                                            <h6 class="mb-1">@plan.Name</h6>
+                                            <small class="text-muted">
+                                                @plan.StartDate.ToString("MMM dd") - @plan.EndDate.ToString("MMM dd, yyyy")
+                                                | @plan.InterestRate.ToString("P2")
+                                            </small>
+                                        </div>
+                                        <span class="badge bg-primary rounded-pill">@plan.ProductPlans.Count products</span>
+                                    </div>
+                                }
+                            </div>
+                            <div class="text-center mt-3">
+                                <a href="/plans" class="btn btn-sm btn-outline-primary">View All Plans</a>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="text-center text-muted py-4">
+                                <i class="fas fa-calendar-alt fa-3x mb-3 opacity-50"></i>
+                                <p>No plans created yet</p>
+                                <a href="/plans" class="btn btn-primary">Create Your First Plan</a>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0"><i class="fas fa-box me-2"></i>Recent Products</h5>
+                    </div>
+                    <div class="card-body">
+                        @if (recentProducts.Any())
+                        {
+                            <div class="list-group list-group-flush">
+                                @foreach (var product in recentProducts.Take(5))
+                                {
+                                    <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                        <div class="d-flex align-items-center">
+                                            @if (product.Image != null && product.Image.Length > 0)
+                                            {
+                                                <img src="data:image/jpeg;base64,@Convert.ToBase64String(product.Image)" 
+                                                     alt="@product.Name" class="me-3 rounded" 
+                                                     style="width: 40px; height: 40px; object-fit: cover;" />
+                                            }
+                                            else
+                                            {
+                                                <div class="me-3 bg-light rounded d-flex align-items-center justify-content-center" 
+                                                     style="width: 40px; height: 40px;">
+                                                    <i class="fas fa-image text-muted"></i>
+                                                </div>
+                                            }
+                                            <div>
+                                                <h6 class="mb-1">@product.Name</h6>
+                                                <small class="text-muted">@product.Subcategory?.Name</small>
+                                            </div>
+                                        </div>
+                                        <span class="fw-bold text-success">$@product.SalePrice.ToString("N2")</span>
+                                    </div>
+                                }
+                            </div>
+                            <div class="text-center mt-3">
+                                <a href="/products" class="btn btn-sm btn-outline-success">View All Products</a>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="text-center text-muted py-4">
+                                <i class="fas fa-box fa-3x mb-3 opacity-50"></i>
+                                <p>No products created yet</p>
+                                <a href="/products" class="btn btn-success">Add Your First Product</a>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private bool loading = true;
+    private int totalPlans = 0;
+    private int totalProducts = 0;
+    private int totalRelationships = 0;
+    private int activePlans = 0;
+    private List<PlanDto> recentPlans = new();
+    private List<ProductDto> recentProducts = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDashboardData();
+    }
+
+    private async Task LoadDashboardData()
+    {
+        loading = true;
+        try
+        {
+            // Load plans data
+            var plansResponse = await PlanService.GetAllAsync(1, 100);
+            if (plansResponse?.IsSuccess == true && plansResponse.Data != null)
+            {
+                var plans = plansResponse.Data.Items?.ToList() ?? new();
+                totalPlans = plans.Count;
+                activePlans = plans.Count(p => p.StartDate <= DateTime.Now && p.EndDate >= DateTime.Now);
+                recentPlans = plans.OrderByDescending(p => p.StartDate).Take(5).ToList();
+            }
+
+            // Load products data
+            var productsResponse = await ProductService.GetAllAsync(1, 100);
+            if (productsResponse?.IsSuccess == true && productsResponse.Data != null)
+            {
+                var products = productsResponse.Data.Items?.ToList() ?? new();
+                totalProducts = products.Count;
+                recentProducts = products.OrderBy(p => p.Id).Take(5).ToList(); // Assuming newer products have higher IDs
+            }
+
+            // Load product-plan relationships
+            var relationshipsResponse = await ProductPlanService.GetAllAsync(1, 100);
+            if (relationshipsResponse?.IsSuccess == true && relationshipsResponse.Data != null)
+            {
+                totalRelationships = relationshipsResponse.Data.TotalRecords;
+            }
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", $"Error loading dashboard data: {ex.Message}");
+        }
+        finally
+        {
+            loading = false;
+        }
+    }
+}
+
+<style>
+    .welcome-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 10px;
+        margin-bottom: 1rem;
+    }
+
+    .stat-card {
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    }
+
+    .stat-card-primary {
+        border-left: 4px solid #0d6efd;
+    }
+
+    .stat-card-success {
+        border-left: 4px solid #198754;
+    }
+
+    .stat-card-info {
+        border-left: 4px solid #0dcaf0;
+    }
+
+    .stat-card-warning {
+        border-left: 4px solid #ffc107;
+    }
+
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 0;
+        color: #2c3e50;
+    }
+
+    .stat-label {
+        font-size: 0.9rem;
+        color: #6c757d;
+        margin-bottom: 0;
+        font-weight: 500;
+    }
+
+    .stat-icon {
+        font-size: 2.5rem;
+        opacity: 0.3;
+    }
+
+    .stat-card-primary .stat-icon {
+        color: #0d6efd;
+    }
+
+    .stat-card-success .stat-icon {
+        color: #198754;
+    }
+
+    .stat-card-info .stat-icon {
+        color: #0dcaf0;
+    }
+
+    .stat-card-warning .stat-icon {
+        color: #ffc107;
+    }
+
+    .quick-action-btn {
+        padding: 1rem;
+        height: auto;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+
+    .quick-action-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.1);
+    }
+
+    .quick-action-btn i {
+        font-size: 1.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .card {
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    }
+
+    .card-header {
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #dee2e6;
+        border-radius: 10px 10px 0 0 !important;
+    }
+
+    .list-group-item {
+        border: none;
+        border-bottom: 1px solid #f1f3f4;
+    }
+
+    .list-group-item:last-child {
+        border-bottom: none;
+    }
+</style>
