@@ -80,6 +80,15 @@
                                         <ValidationMessage For="@(() => createProductDto.SalePrice)" />
                                     </div>
                                 </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <InputFile OnChange="HandleImageUpload" accept="image/*" />
+                                        @if (previewUrl != null)
+                                        {
+                                            <img src="@previewUrl" style="max-width:300px; margin-top:10px;" />
+                                        }
+                                    </div>>
+                                </div>
                             </div>
 
                             <div class="d-flex justify-content-between">
@@ -112,11 +121,30 @@
 
     private string JsonOutput = string.Empty;
 
-    private void UpdateJson() =>
+    private void UpdateJson()
+    {
         JsonOutput = Root.ToJsonString(new JsonSerializerOptions { WriteIndented = true });
+        createProductDto.Characteristics = JsonOutput;
+    }
 
     private void Save() => UpdateJson();
+    
+    private string? previewUrl;
+    private async Task HandleImageUpload(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
 
+        // Resize image if needed
+        var resizedImageFile = await file.RequestImageFileAsync(file.ContentType, 400, 400);
+
+        using var stream = resizedImageFile.OpenReadStream(maxAllowedSize: 10_000_000); // limit 10 MB
+        using var ms = new MemoryStream();
+        await stream.CopyToAsync(ms);
+
+        var bytes = ms.ToArray();
+        previewUrl = $"data:{file.ContentType};base64,{Convert.ToBase64String(bytes)}";
+        createProductDto.Image = bytes;
+    }
 
     private CreateProductDto createProductDto = new();
     private List<SubcategoryDto> subcategories = new();
