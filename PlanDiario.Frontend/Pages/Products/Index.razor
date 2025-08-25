@@ -61,9 +61,11 @@
                             <tr>
                                 <th>ID</th>
                                 <th>Nombre</th>
+                                <th>Descripción</th>
                                 <th>Subcategoria</th>
-                                <th>Categoría</th>
-                                <th>Precio</th>
+                                <th>Precio de Costo</th>
+                                <th>Precio de Venta</th>
+                                <th>Imagen</th>
                                 <th>Acciones</th>
                             </tr>
                         </thead>
@@ -74,8 +76,15 @@
                                     <td>@product.Id</td>
                                     <td>@product.Name</td>
                                     <td>@product.Subcategory?.Name</td>
-                                    <td>@product.Subcategory?.Category.Name</td>
                                     <td>$@product.CostPrice.ToString("F2")</td>
+                                    <td>$@product.SalePrice.ToString("F2")</td>
+                                    <td>
+                                        @if (product.Image != null && product.Image.Length > 0)
+                                        {
+                                            <img src="data:image/*;base64,@Convert.ToBase64String(product.Image)"
+                                                 style="max-width:120px; max-height:120px;" />
+                                        }
+                                    </td>
                                     <td>
                                         <div class="btn-group" role="group">
                                             <NavLink class="btn btn-sm btn-info" href="@($"/products/{product.Id}")">

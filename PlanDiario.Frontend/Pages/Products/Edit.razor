@@ -1,6 +1,8 @@
 ﻿@page "/products/edit/{id:int}"
 @using PlanDiario.Application.DTOs
 @using PlanDiario.Frontend.Services
+@using System.Text.Json.Nodes
+@using System.Text.Json
 @inject IProductService ProductService
 @inject NavigationManager Navigation
 @inject IJSRuntime JSRuntime
@@ -43,6 +45,16 @@
 
                             <div class="row">
                                 <div class="col-md-6">
+                                    <JsonEditor Node="Root" OnChanged="UpdateJson" />
+                                    {
+                                        <h4>Resultante</h4>
+                                        <pre>@JsonOutput</pre>
+                                    }
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
                                     <div class="mb-3">
                                         <label for="subcategory" class="form-label">Subcategoría *</label>
                                         <InputSelect id="subcategory" class="form-select" @bind-Value="updateProductDto.SubcategoryId">
@@ -67,11 +79,25 @@
                                 </div>
                                 <div class="col-md-6">
                                     <div class="mb-3">
-                                        <label for="price" class="form-label">Precio de Compra</label>
+                                        <label for="price" class="form-label">Precio de Costo</label>
                                         <InputNumber id="price" class="form-control" @bind-Value="updateProductDto.CostPrice" step="1.0" />
                                         <ValidationMessage For="@(() => updateProductDto.CostPrice)" />
                                     </div>
                                 </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <InputFile OnChange="HandleImageUpload" accept="image/*" />
+                                @if (previewUrl != null)
+                                {
+                                    <img src="@previewUrl" style="max-width:300px; margin-top:10px;" />
+                                }
+                            </div>>
+
+                            <div class="mb-3">
+                                <label for="providerUrl" class="form-label">URL Proveedor</label>
+                                <InputTextArea id="providerUrl" class="form-control" rows="3" @bind-Value="updateProductDto.ProviderUrl" />
+                                <ValidationMessage For="@(() => updateProductDto.ProviderUrl)" />
                             </div>
 
                             <div class="d-flex justify-content-between">
@@ -109,6 +135,27 @@
     private bool submitting = false;
     private bool productFound = false;
 
+    private JsonNode Root = JsonNode.Parse(@"{
+    ""Caracteristicas"": {
+    ""Nombre"": ""Heladera"",
+    ""Marca"": ""Philips"",
+    ""Modelo"": ""X200"",
+    ""Color"": ""Blanco"",
+    ""Garantia"": ""12 meses"",
+    ""ConsumoEnergetico"": ""A+"",
+    ""Potencia"": ""150W"",
+    ""Dimensiones"": {
+      ""Alto"": ""170 cm"",
+      ""Ancho"": ""70 cm"",
+      ""Profundidad"": ""65 cm""
+    },
+    ""Peso"": ""60 kg""
+      },
+      ""EnStock"": ""Si"",
+      ""Transportable"": ""Si"",
+      ""AccesoriosIncluidos"": [ ""Manual"", ""Cable de alimentación"", ""Kit de instalación"" ]
+    }")!;
+
     protected override async Task OnInitializedAsync()
     {
         await LoadSubcategories();
@@ -135,7 +182,9 @@
             updateProductDto.SubcategoryId = result.Data.SubcategoryId;
             updateProductDto.CostPrice = result.Data.CostPrice;
             updateProductDto.SalePrice = result.Data.SalePrice;
-            //TODO add characteristics and image updateProductDto.
+            updateProductDto.Characteristics = result.Data.Characteristics;
+            updateProductDto.Image = result.Data.Image;
+            updateProductDto.ProviderUrl = result.Data.ProviderUrl;
             productFound = true;
         }
 
@@ -158,5 +207,32 @@
         }
 
         submitting = false;
+    }
+
+    private string JsonOutput = string.Empty;
+
+    private void UpdateJson()
+    {
+        JsonOutput = Root.ToJsonString(new JsonSerializerOptions { WriteIndented = true });
+        updateProductDto.Characteristics = JsonOutput;
+    }
+
+    private void Save() => UpdateJson();
+
+    private string? previewUrl;
+    private async Task HandleImageUpload(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+
+        // Resize image if needed
+        var resizedImageFile = await file.RequestImageFileAsync(file.ContentType, 400, 400);
+
+        using var stream = resizedImageFile.OpenReadStream(maxAllowedSize: 10_000_000); // limit 10 MB
+        using var ms = new MemoryStream();
+        await stream.CopyToAsync(ms);
+
+        var bytes = ms.ToArray();
+        previewUrl = $"data:{file.ContentType};base64,{Convert.ToBase64String(bytes)}";
+        updateProductDto.Image = bytes;
     }
 }

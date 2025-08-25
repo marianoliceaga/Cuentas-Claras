@@ -46,13 +46,9 @@
                             <div class="mb-3">
                                 <label for="description" class="form-label">Características</label>
                                 <JsonEditor Node="Root" OnChanged="UpdateJson" />
-
-                                <br />
-                                <button class="btn btn-primary" @onclick="Save">Guardar Características</button>
-
                                 @if (!string.IsNullOrEmpty(JsonOutput))
                                 {
-                                    <h4>JSON Resultante</h4>
+                                    <h4>Resultante</h4>
                                     <pre>@JsonOutput</pre>
                                 }
                             </div>
@@ -75,6 +71,13 @@
                                 </div>
                                 <div class="col-md-6">
                                     <div class="mb-3">
+                                        <label for="price" class="form-label">Precio de Costo</label>
+                                        <InputNumber id="price" class="form-control" @bind-Value="createProductDto.CostPrice" step="1.00" />
+                                        <ValidationMessage For="@(() => createProductDto.CostPrice)" />
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
                                         <label for="price" class="form-label">Precio de Venta</label>
                                         <InputNumber id="price" class="form-control" @bind-Value="createProductDto.SalePrice" step="1.00" />
                                         <ValidationMessage For="@(() => createProductDto.SalePrice)" />
@@ -90,7 +93,11 @@
                                     </div>>
                                 </div>
                             </div>
-
+                            <div class="mb-3">
+                                <label for="providerUrl" class="form-label">URL Proveedor</label>
+                                <InputTextArea id="providerUrl" class="form-control" rows="3" @bind-Value="createProductDto.ProviderUrl" />
+                                <ValidationMessage For="@(() => createProductDto.ProviderUrl)" />
+                            </div>
                             <div class="d-flex justify-content-between">
                                 <NavLink type="button" class="btn btn-secondary" href="/products">
                                     <i class="fas fa-arrow-left"></i> Vuelta a Artículos
@@ -113,11 +120,26 @@
 
 @code {
     private JsonNode Root = JsonNode.Parse(@"{
-      ""Caracteristicas"": { ""Color"": ""Azul"", ""Tamaño"": ""Grande"" },
+    ""Caracteristicas"": {    
+    ""Nombre"": ""Heladera"",
+    ""Marca"": ""Philips"",
+    ""Modelo"": ""X200"",
+    ""Color"": ""Blanco"",
+    ""Garantia"": ""12 meses"",
+    ""ConsumoEnergetico"": ""A+"",
+    ""Potencia"": ""150W"",
+    ""Dimensiones"": {
+      ""Alto"": ""170 cm"",
+      ""Ancho"": ""70 cm"",
+      ""Profundidad"": ""65 cm""
+    },
+    ""Peso"": ""60 kg""
+      },
       ""EnStock"": ""Si"",
       ""Transportable"": ""Si"",
-      ""Marca/Modelo"": [ ""Siam"", ""Queseyo"" ]
+      ""AccesoriosIncluidos"": [ ""Manual"", ""Cable de alimentación"", ""Kit de instalación"" ]
     }")!;
+
 
     private string JsonOutput = string.Empty;
 
