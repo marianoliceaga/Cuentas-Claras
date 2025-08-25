@@ -184,7 +184,12 @@ namespace PlanDiario.API.Services
                         Id = productPlan.Product.Subcategory.Id,
                         Name = productPlan.Product.Subcategory.Name
                     } : null,
-                } : null
+                } : null,
+                CategoryName = productPlan.Product?.Subcategory?.Name,
+                SubcategoryName = productPlan.Product?.Subcategory?.Category?.Name,
+                ProductName = productPlan.Product?.Name,
+                PlanName = productPlan.Plan?.Name
+
             };
         }
     }

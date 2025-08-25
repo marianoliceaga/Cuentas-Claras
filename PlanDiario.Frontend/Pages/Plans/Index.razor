@@ -108,16 +108,6 @@
                         </ul>
                     </nav>
                 }
-
-                @* Summary *@
-                <div class="row mt-3">
-                    <div class="col-md-6">
-                        <strong>Items Totales: @productPlans.Sum(pp => pp.Quantity)</strong>
-                    </div>
-                    <div class="col-md-6 text-end">
-                        <strong>Valor Total: $@productPlans.Sum(pp => (pp.ProductPrice != 0 ? pp.ProductPrice : 0) * pp.Quantity).ToString("F2")</strong>
-                    </div>
-                </div>
             </div>
         </div>
     }
