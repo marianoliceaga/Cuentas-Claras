@@ -12,7 +12,7 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title">Detalles Artículo/Plans</h3>
+                    <h3 class="card-title">Detalles Artículo/Plan</h3>
                     <div class="card-tools">
                         <button type="button" class="btn btn-secondary me-2" @onclick="GoBack">
                             <i class="fas fa-arrow-left"></i> Volver a la lista
@@ -278,7 +278,7 @@
 
             if (response?.Success == true)
             {
-                await JSRuntime.InvokeVoidAsync("alert", "success", "Product Plan deleted successfully!");
+                await JSRuntime.InvokeVoidAsync("alert", "Product Plan deleted successfully!");
                 Navigation.NavigateTo("/productplans");
             }
             else

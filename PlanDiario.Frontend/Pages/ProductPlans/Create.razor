@@ -216,7 +216,7 @@
             if (response?.Success == true)
             {
                 successMessage = "Artículo/Plan creado exitosamente";
-                await JSRuntime.InvokeVoidAsync("alert", "success", "Artículo/Plan creado exitosamente!");
+                await JSRuntime.InvokeVoidAsync("alert", "Artículo/Plan creado exitosamente!");
 
                 // Wait a moment to show the success message, then navigate
                 await Task.Delay(1500);

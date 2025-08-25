@@ -109,7 +109,7 @@
                                                     {
                                                         <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
                                                     }
-                                                    <i class="fas fa-save me-1"></i> Actualiza
+                                                    <i class="fas fa-save me-1"></i> Actualizar
                                                 </button>
                                                 <button type="button" class="btn btn-secondary" @onclick="ResetForm" disabled="@isLoading">
                                                     <i class="fas fa-undo me-1"></i> Resetear
@@ -265,13 +265,13 @@
             }
             else
             {
-                errorMessage = response?.Message ?? "Product Plan not found.";
+                errorMessage = response?.Message ?? "Relación no encontrada.";
                 originalProductPlan = null;
             }
         }
         catch (Exception ex)
         {
-            errorMessage = $"An error occurred while loading the product plan: {ex.Message}";
+            errorMessage = $"Ocurrió un error cargando la relación: {ex.Message}";
             originalProductPlan = null;
         }
         finally
@@ -298,7 +298,7 @@
                 var existsResponse = await ProductPlanService.CheckExistsAsync(model.PlanId, model.ProductId);
                 if (existsResponse?.Success == true && existsResponse.Data == true)
                 {
-                    errorMessage = "A product plan with this Product ID and Plan ID combination already exists.";
+                    errorMessage = "Ya existe esta combinación.";
                     return;
                 }
             }
@@ -307,20 +307,20 @@
 
             if (response?.Success == true)
             {
-                successMessage = "Product Plan updated successfully!";
-                await JSRuntime.InvokeVoidAsync("alert", "success", "Product Plan updated successfully!");
+                successMessage = "Artículo/Plan actualizado extosamente";
+                await JSRuntime.InvokeVoidAsync("alert", "Artículo / Plan actualizado extosamente");
 
                 // Reload the original data to reflect changes
                 await LoadProductPlan();
             }
             else
             {
-                errorMessage = response?.Message ?? "An error occurred while updating the product plan.";
+                errorMessage = response?.Message ?? "Ocurrió un error actualizando la relación";
             }
         }
         catch (Exception ex)
         {
-            errorMessage = $"An unexpected error occurred: {ex.Message}";
+            errorMessage = $"Ocurrió un error inesperado: {ex.Message}";
         }
         finally
         {
@@ -331,7 +331,7 @@
 
     private async Task HandleInvalidSubmit()
     {
-        errorMessage = "Please correct the validation errors below.";
+        errorMessage = "Por favor corrija los errores de validación.";
         await Task.CompletedTask;
     }
 
@@ -357,7 +357,7 @@
 
     private async Task ConfirmDelete(int id)
     {
-        var confirmed = await JSRuntime.InvokeAsync<bool>("confirm", "Are you sure you want to delete this product plan? This action cannot be undone.");
+        var confirmed = await JSRuntime.InvokeAsync<bool>("confirm", "Querés borrar esta relación? Esta acción no puede ser deshecha.");
         if (confirmed)
         {
             await DeleteProductPlan(id);
@@ -372,17 +372,17 @@
 
             if (response?.Success == true)
             {
-                await JSRuntime.InvokeVoidAsync("alert", "success", "Product Plan deleted successfully!");
+                await JSRuntime.InvokeVoidAsync("alert", "Relación borrada exitosamente!");
                 Navigation.NavigateTo("/productplans");
             }
             else
             {
-                await JSRuntime.InvokeVoidAsync("alert", "error", response?.Message ?? "An error occurred while deleting the product plan.");
+                await JSRuntime.InvokeVoidAsync("alert", response?.Message ?? "Un error ocurrió al eliminar el Artículo/Plan");
             }
         }
         catch (Exception ex)
         {
-            await JSRuntime.InvokeVoidAsync("alert", "error", $"An error occurred: {ex.Message}");
+            await JSRuntime.InvokeVoidAsync("alert", $"Un error ocurrió: {ex.Message}");
         }
     }
 

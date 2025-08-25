@@ -335,7 +335,7 @@
 
             if (response?.Success == true)
             {
-                await JSRuntime.InvokeVoidAsync("alert", "success", "La relación fue borrada exitosamente!");
+                await JSRuntime.InvokeVoidAsync("alert", "La relación fue borrada exitosamente!");
                 
                 // If we're on a page that would be empty after deletion, go to previous page
                 if (pagedResult != null && pagedResult.Items.Count == 1 && currentPage > 1)
