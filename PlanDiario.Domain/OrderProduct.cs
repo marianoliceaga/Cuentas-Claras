@@ -7,6 +7,6 @@
         public Order Order { get; set; } = default!;
         public int ProductId { get; set; }
         public Product Product { get; set; } = default!;
-        public Dictionary<int, int>? ProductIdQuantity { get; set; }
+        public int Quantity { get; set; }
     }
 }

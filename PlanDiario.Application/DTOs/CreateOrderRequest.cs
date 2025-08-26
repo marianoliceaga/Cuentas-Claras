@@ -17,6 +17,7 @@ namespace PlanDiario.Application.DTOs
         public DateTime? OrderStartDate { get; set; }
         public WeekDay WeekDay { get; set; } = WeekDay.Monday;
         public OrderType OrderType { get; set; } = OrderType.Product;
-        public Dictionary<int, int> ProductIdsQuantity { get; set; } = [];
+        public List<int> ProductIds { get; set; } = new List<int>();
+        public int Quantity { get; set; } = 1;
     }
 }

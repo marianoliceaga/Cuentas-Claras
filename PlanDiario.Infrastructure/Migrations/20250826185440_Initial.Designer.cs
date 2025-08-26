@@ -12,8 +12,8 @@ using PlanDiario.Infrastructure.Persistence;
 namespace PlanDiario.Infrastructure.Migrations
 {
     [DbContext(typeof(PlanDiarioDbContext))]
-    [Migration("20250807023059_Iteration1Fix")]
-    partial class Iteration1Fix
+    [Migration("20250826185440_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -2209,8 +2209,13 @@ namespace PlanDiario.Infrastructure.Migrations
                     b.Property<int>("BusinessTypeId")
                         .HasColumnType("int");
 
+                    b.Property<decimal>("CostPrice")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
 
                     b.Property<Guid>("CustomerId")
                         .HasColumnType("uniqueidentifier");
@@ -2241,7 +2246,9 @@ namespace PlanDiario.Infrastructure.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
 
                     b.Property<string>("WeekDay")
                         .IsRequired()
@@ -2272,11 +2279,15 @@ namespace PlanDiario.Infrastructure.Migrations
                     b.Property<int>("ProductId")
                         .HasColumnType("int");
 
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("OrderId");
-
                     b.HasIndex("ProductId");
+
+                    b.HasIndex("OrderId", "ProductId")
+                        .IsUnique();
 
                     b.ToTable("OrderProducts");
                 });
@@ -3400,19 +3411,19 @@ namespace PlanDiario.Infrastructure.Migrations
                     b.HasOne("PlanDiario.Domain.BusinessType", "BusinessType")
                         .WithMany("Orders")
                         .HasForeignKey("BusinessTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("PlanDiario.Domain.Customer", "Customer")
                         .WithMany("Orders")
                         .HasForeignKey("CustomerId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("PlanDiario.Domain.Period", "Period")
                         .WithMany("Orders")
                         .HasForeignKey("PeriodId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("BusinessType");

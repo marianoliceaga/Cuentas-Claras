@@ -97,12 +97,13 @@ namespace PlanDiario.API.Services
 
             _context.Orders.Add(order);
 
-            foreach (var productIdQuantity in request.ProductIdsQuantity)
+            foreach (var productId in request.ProductIds)
             {
                 var orderProduct = new OrderProduct
                 {
                     OrderId = order.Id,
-                    ProductIdQuantity.Add(productIdQuantity)
+                    ProductId = productId,
+                    Quantity = request.Quantity
                 };
                 _context.Set<OrderProduct>().Add(orderProduct);
             }
@@ -129,15 +130,17 @@ namespace PlanDiario.API.Services
             order.Status = (Domain.OrderStatus)request.Status;
             order.WeekDay = (Domain.WeekDay)request.WeekDay;
             order.OrderType = (Domain.OrderType)request.OrderType;
+            order.CreatedAt = request.CreatedAt ?? order.CreatedAt;
             order.UpdatedAt = DateTime.UtcNow;
-
             _context.Set<OrderProduct>().RemoveRange(order.OrderProducts);
+
             foreach (var productId in request.ProductIds)
             {
                 var orderProduct = new OrderProduct
                 {
                     OrderId = order.Id,
-                    ProductId = productId
+                    ProductId = productId,
+                    Quantity = request.Quantity
                 };
                 _context.Set<OrderProduct>().Add(orderProduct);
             }
@@ -263,6 +266,7 @@ namespace PlanDiario.API.Services
                                 }
                             }
                         },
+                        Quantity = op.Quantity,
                         ProviderUrl = op.Product.ProviderUrl
                     }
                 }).ToList()

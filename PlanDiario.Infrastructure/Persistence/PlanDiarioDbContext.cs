@@ -35,6 +35,7 @@ namespace PlanDiario.Infrastructure.Persistence
             modelBuilder.Entity<Customer>(entity =>
             {
                 entity.HasKey(e => e.Id);
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
                 entity.Property(e => e.DNI).IsRequired().HasMaxLength(20);
                 entity.Property(e => e.Name).IsRequired().HasMaxLength(100);
                 entity.Property(e => e.LastName).IsRequired().HasMaxLength(100);
@@ -42,16 +43,35 @@ namespace PlanDiario.Infrastructure.Persistence
                 entity.HasOne(e => e.Collector).WithMany(c => c.Customers).HasForeignKey(e => e.CollectorId).OnDelete(DeleteBehavior.Restrict);
                 entity.HasOne(e => e.Salesman).WithMany(s => s.Customers).HasForeignKey(e => e.SalesmanId).OnDelete(DeleteBehavior.Restrict);
                 entity.HasIndex(e => e.DNI).IsUnique();
+
             });
 
             // Order configuration
             modelBuilder.Entity<Order>(entity =>
             {
-                entity.HasKey(e => e.Id);
                 entity.Property(e => e.SellingPrice).HasColumnType("decimal(18,2)");
-                entity.HasOne(e => e.Customer).WithMany(c => c.Orders).HasForeignKey(e => e.CustomerId);
-                entity.HasOne(e => e.Period).WithMany(p => p.Orders).HasForeignKey(e => e.PeriodId);
-                entity.HasOne(e => e.BusinessType).WithMany(bt => bt.Orders).HasForeignKey(e => e.BusinessTypeId);
+                entity.Property(e => e.CostPrice).HasColumnType("decimal(18,2)");
+                entity.Property(e => e.Status).HasConversion<string>();
+                entity.Property(e => e.WeekDay).HasConversion<string>();
+                entity.Property(e => e.OrderType).HasConversion<string>();
+                entity.Property(e => e.CreatedAt).HasDefaultValueSql("GETDATE()");
+                entity.Property(e => e.UpdatedAt).HasDefaultValueSql("GETDATE()");
+
+                entity.HasOne(e => e.Customer)
+                      .WithMany(c => c.Orders)
+                      .HasForeignKey(e => e.CustomerId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(e => e.Period)
+                      .WithMany(p => p.Orders)
+                      .HasForeignKey(e => e.PeriodId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(e => e.BusinessType)
+                      .WithMany(bt => bt.Orders)
+                      .HasForeignKey(e => e.BusinessTypeId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
             });
 
             // Product configuration
@@ -70,6 +90,7 @@ namespace PlanDiario.Infrastructure.Persistence
                 entity.HasKey(e => e.Id);
                 entity.HasOne(e => e.Order).WithMany(o => o.OrderProducts).HasForeignKey(e => e.OrderId);
                 entity.HasOne(e => e.Product).WithMany(p => p.OrderProducts).HasForeignKey(e => e.ProductId);
+                entity.HasIndex(e => new { e.OrderId, e.ProductId }).IsUnique();
             });
 
             // Other entity configurations
@@ -717,9 +738,12 @@ namespace PlanDiario.Infrastructure.Persistence
             {
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.SellingPrice).HasColumnType("decimal(18,2)");
+                entity.Property(e => e.CostPrice).HasColumnType("decimal(18,2)");
                 entity.Property(e => e.Status).HasConversion<string>();
                 entity.Property(e => e.WeekDay).HasConversion<string>();
                 entity.Property(e => e.OrderType).HasConversion<string>();
+                entity.Property(e => e.CreatedAt).HasDefaultValueSql("GETDATE()");
+                entity.Property(e => e.UpdatedAt).HasDefaultValueSql("GETDATE()");
 
                 entity.HasOne(e => e.Customer)
                       .WithMany(c => c.Orders)

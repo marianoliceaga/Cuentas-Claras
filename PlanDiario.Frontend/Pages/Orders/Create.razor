@@ -278,16 +278,17 @@
     {
         if (isSelected)
         {
-            if (!model.ProductIdsQuantity.ContainsKey(productId))
+            if (!model.ProductIds.Contains(productId))
             {
-                model.ProductIdsQuantity.Add(productId, quantity);
                 model.SellingPrice = products?.Sum(p => p.SalePrice) ?? 0;
                 model.CostPrice = products?.Sum(p => p.CostPrice) ?? 0;
+                model.ProductIds.Add(productId);
+                model.Quantity += quantity;
             }
         }
         else
         {
-            model.ProductIdsQuantity.Remove(productId);
+            model.ProductIds.Remove(productId);
         }
         StateHasChanged();
     }

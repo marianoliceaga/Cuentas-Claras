@@ -22,5 +22,6 @@ namespace PlanDiario.Application.DTOs
         public WeekDay WeekDay { get; set; }
         public OrderType OrderType { get; set; }
         public List<int> ProductIds { get; set; } = new List<int>();
+        public int Quantity { get; set; } = 1;
     }
 }

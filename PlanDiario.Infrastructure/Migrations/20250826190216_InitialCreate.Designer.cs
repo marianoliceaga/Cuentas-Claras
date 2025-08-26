@@ -12,7 +12,7 @@ using PlanDiario.Infrastructure.Persistence;
 namespace PlanDiario.Infrastructure.Migrations
 {
     [DbContext(typeof(PlanDiarioDbContext))]
-    [Migration("20250805021405_InitialCreate")]
+    [Migration("20250826190216_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -2209,8 +2209,13 @@ namespace PlanDiario.Infrastructure.Migrations
                     b.Property<int>("BusinessTypeId")
                         .HasColumnType("int");
 
+                    b.Property<decimal>("CostPrice")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
 
                     b.Property<Guid>("CustomerId")
                         .HasColumnType("uniqueidentifier");
@@ -2241,7 +2246,9 @@ namespace PlanDiario.Infrastructure.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
 
                     b.Property<string>("WeekDay")
                         .IsRequired()
@@ -2272,11 +2279,15 @@ namespace PlanDiario.Infrastructure.Migrations
                     b.Property<int>("ProductId")
                         .HasColumnType("int");
 
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("OrderId");
-
                     b.HasIndex("ProductId");
+
+                    b.HasIndex("OrderId", "ProductId")
+                        .IsUnique();
 
                     b.ToTable("OrderProducts");
                 });
@@ -2452,17 +2463,17 @@ namespace PlanDiario.Infrastructure.Migrations
                     b.Property<decimal>("SalePrice")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<int?>("SubcategoryId")
+                    b.Property<int>("SubcategoryId")
                         .HasColumnType("int");
 
-                    b.Property<int>("idSubcategory")
+                    b.Property<int?>("SubcategoryId1")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
                     b.HasIndex("SubcategoryId");
 
-                    b.HasIndex("idSubcategory");
+                    b.HasIndex("SubcategoryId1");
 
                     b.ToTable("Products");
 
@@ -2476,7 +2487,7 @@ namespace PlanDiario.Infrastructure.Migrations
                             Name = "Silla Plástica Apilable",
                             ProviderUrl = "https://proveedor.example/silla-plastica",
                             SalePrice = 1999m,
-                            idSubcategory = 1
+                            SubcategoryId = 1
                         },
                         new
                         {
@@ -2487,7 +2498,7 @@ namespace PlanDiario.Infrastructure.Migrations
                             Name = "Mesa Plegable 1,80 m",
                             ProviderUrl = "https://proveedor.example/mesa-plegable",
                             SalePrice = 8490m,
-                            idSubcategory = 1
+                            SubcategoryId = 1
                         },
                         new
                         {
@@ -2498,7 +2509,7 @@ namespace PlanDiario.Infrastructure.Migrations
                             Name = "Heladera Comercial 400 L",
                             ProviderUrl = "https://proveedor.example/heladera-400l",
                             SalePrice = 214900m,
-                            idSubcategory = 2
+                            SubcategoryId = 2
                         },
                         new
                         {
@@ -2509,7 +2520,7 @@ namespace PlanDiario.Infrastructure.Migrations
                             Name = "Microondas 23 L",
                             ProviderUrl = "https://proveedor.example/microondas-23l",
                             SalePrice = 62990m,
-                            idSubcategory = 2
+                            SubcategoryId = 2
                         },
                         new
                         {
@@ -2520,7 +2531,7 @@ namespace PlanDiario.Infrastructure.Migrations
                             Name = "Lámpara LED 20 W",
                             ProviderUrl = "https://proveedor.example/lampara-led",
                             SalePrice = 1990m,
-                            idSubcategory = 3
+                            SubcategoryId = 3
                         });
                 });
 
@@ -3400,19 +3411,19 @@ namespace PlanDiario.Infrastructure.Migrations
                     b.HasOne("PlanDiario.Domain.BusinessType", "BusinessType")
                         .WithMany("Orders")
                         .HasForeignKey("BusinessTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("PlanDiario.Domain.Customer", "Customer")
                         .WithMany("Orders")
                         .HasForeignKey("CustomerId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("PlanDiario.Domain.Period", "Period")
                         .WithMany("Orders")
                         .HasForeignKey("PeriodId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("BusinessType");
@@ -3454,15 +3465,15 @@ namespace PlanDiario.Infrastructure.Migrations
 
             modelBuilder.Entity("PlanDiario.Domain.Product", b =>
                 {
-                    b.HasOne("PlanDiario.Domain.Subcategory", null)
-                        .WithMany("Products")
-                        .HasForeignKey("SubcategoryId");
-
                     b.HasOne("PlanDiario.Domain.Subcategory", "Subcategory")
                         .WithMany()
-                        .HasForeignKey("idSubcategory")
+                        .HasForeignKey("SubcategoryId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.HasOne("PlanDiario.Domain.Subcategory", null)
+                        .WithMany("Products")
+                        .HasForeignKey("SubcategoryId1");
 
                     b.Navigation("Subcategory");
                 });
