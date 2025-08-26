@@ -86,6 +86,11 @@
                                         <InputNumber id="sellingPrice" class="form-control" @bind-Value="model.SellingPrice" />
                                         <ValidationMessage For="@(() => model.SellingPrice)" class="text-danger" />
                                     </div>
+                                    <div class="form-group mb-3">
+                                        <label for="costPrice" class="form-label">Costo <span class="text-danger">*</span></label>
+                                        <InputNumber id="costPrice" class="form-control" @bind-Value="model.CostPrice" />
+                                        <ValidationMessage For="@(() => model.CostPrice)" class="text-danger" />
+                                    </div>
                                 </div>
                                 <div class="col-md-4">
                                     <div class="form-group mb-3">
@@ -306,6 +311,9 @@
                     PeriodId = order.PeriodId,
                     BusinessTypeId = order.BusinessTypeId,
                     OrderStartDate = order.OrderStartDate,
+                    CostPrice = order.CostPrice,
+                    CreatedAt = order.CreatedAt,
+                    UpdatedAt = order.UpdatedAt,
                     Status = order.Status,
                     WeekDay = order.WeekDay,
                     OrderType = order.OrderType,
@@ -332,12 +340,15 @@
             if (!model.ProductIds.Contains(productId))
             {
                 model.ProductIds.Add(productId);
+                model.SellingPrice = products?.Sum(p => p.SalePrice) ?? 0;
+                model.CostPrice = products?.Sum(p => p.CostPrice) ?? 0;
             }
         }
         else
         {
             model.ProductIds.Remove(productId);
         }
+        StateHasChanged();
     }
 
     private async Task HandleValidSubmit()

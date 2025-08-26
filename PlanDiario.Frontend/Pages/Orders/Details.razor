@@ -1,6 +1,7 @@
 ﻿@page "/orders/details/{Id:guid}"
 @using PlanDiario.Application.DTOs
 @using PlanDiario.Frontend.Services
+@using System.Globalization
 @inject IOrderService OrderService
 @inject NavigationManager Navigation
 @inject IJSRuntime JSRuntime
@@ -62,7 +63,11 @@
                                     </tr>
                                     <tr>
                                         <td><strong>Precio de Venta:</strong></td>
-                                        <td>@order.SellingPrice.ToString("C")</td>
+                                        <td>@order.SellingPrice.ToString("C", new CultureInfo("es-AR"))</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Costo:</strong></td>
+                                        <td>@order.CostPrice.ToString("C", new CultureInfo("es-AR"))</td>
                                     </tr>
                                     <tr>
                                         <td><strong>Estado:</strong></td>
@@ -107,11 +112,11 @@
                                 <table class="table table-borderless">
                                     <tr>
                                         <td><strong>Fecha de Creación:</strong></td>
-                                        <td>@order.CreatedAt.ToString("dd/MM/yyyy HH:mm:ss")</td>
+                                        <td>@order.CreatedAt!.Value.ToString("dd/MM/yyyy HH:mm:ss")</td>
                                     </tr>
                                     <tr>
                                         <td><strong>Última Actualización:</strong></td>
-                                        <td>@order.UpdatedAt.ToString("dd/MM/yyyy HH:mm:ss")</td>
+                                        <td>@order.UpdatedAt!.Value.ToString("dd/MM/yyyy HH:mm:ss")</td>
                                     </tr>
                                 </table>
                             </div>

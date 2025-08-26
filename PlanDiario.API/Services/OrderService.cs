@@ -97,12 +97,12 @@ namespace PlanDiario.API.Services
 
             _context.Orders.Add(order);
 
-            foreach (var productId in request.ProductIds)
+            foreach (var productIdQuantity in request.ProductIdsQuantity)
             {
                 var orderProduct = new OrderProduct
                 {
                     OrderId = order.Id,
-                    ProductId = productId
+                    ProductIdQuantity.Add(productIdQuantity)
                 };
                 _context.Set<OrderProduct>().Add(orderProduct);
             }

@@ -9,6 +9,7 @@ namespace PlanDiario.Domain
         public Guid CustomerId { get; set; }
         public Customer Customer { get; set; } = default!;
         public decimal SellingPrice { get; set; }
+        public decimal CostPrice { get; set; }
         public string PeriodName { get; set; } = string.Empty;
         public int PeriodId { get; set; }
         public Period Period { get; set; } = default!;

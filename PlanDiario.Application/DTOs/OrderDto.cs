@@ -13,13 +13,14 @@ namespace PlanDiario.Application.DTOs
         public Guid CustomerId { get; set; }
         public CustomerDto Customer { get; set; } = default!;
         public decimal SellingPrice { get; set; }
+        public decimal CostPrice { get; set; }
         public string PeriodName { get; set; } = string.Empty;
         public int PeriodId { get; set; }
         public PeriodDto Period { get; set; } = default!;
         public int BusinessTypeId { get; set; }
         public BusinessTypeDto BusinessType { get; set; } = default!;
-        public DateTime CreatedAt { get; set; }
-        public DateTime UpdatedAt { get; set; }
+        public DateTime? CreatedAt { get; set; }
+        public DateTime? UpdatedAt { get; set; }
         public DateTime? OrderStartDate { get; set; }
         public OrderStatus Status { get; set; } = OrderStatus.Created;
         public WeekDay WeekDay { get; set; } = WeekDay.Monday;

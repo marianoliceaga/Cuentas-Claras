@@ -1,6 +1,7 @@
 ﻿@page "/orders"
 @using PlanDiario.Application.DTOs
 @using PlanDiario.Frontend.Services
+@using System.Globalization
 @inject IOrderService OrderService
 @inject NavigationManager Navigation
 @inject IJSRuntime JSRuntime
@@ -65,7 +66,7 @@
                                             <td>@order.Id.ToString("N")[..8]...</td>
                                             <td>@order.Description</td>
                                             <td>@order.Customer?.Name</td>
-                                            <td>@order.SellingPrice.ToString("C")</td>
+                                            <td>@order.SellingPrice.ToString("C", new CultureInfo("es-AR"))</td>
                                             <td>@order.Period?.Name</td>
                                             <td>@order.BusinessType?.Name</td>
                                             <td>

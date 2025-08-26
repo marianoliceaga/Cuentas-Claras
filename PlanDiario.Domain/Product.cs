@@ -12,7 +12,7 @@
         public int SubcategoryId { get; set; }
         public Subcategory Subcategory { get; set; } = default!;
         public string ProviderUrl { get; set; } = string.Empty;
-        
+
         // Navigation properties
         public ICollection<OrderProduct> OrderProducts { get; set; } = new List<OrderProduct>();
         public ICollection<ProductPlan> ProductPlans { get; set; } = new List<ProductPlan>();
