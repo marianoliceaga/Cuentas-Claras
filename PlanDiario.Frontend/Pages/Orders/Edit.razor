@@ -70,7 +70,7 @@
                                             {
                                                 @foreach (var customer in customers)
                                                 {
-                                                    <option value="@customer.Id">@customer.Name</option>
+                                                    <option value="@customer.Id">@customer.Name @customer.LastName</option>
                                                 }
                                             }
                                         </InputSelect>
@@ -186,7 +186,7 @@
                                                         <div class="form-check">
                                                             <input type="checkbox" class="form-check-input" id="product-@product.Id"
                                                                    checked="@(model.ProductIds.Contains(product.Id))"
-                                                                   @onchange="@((e) => ToggleProduct(product.Id, (bool)e.Value!))" />
+                                                                   @onchange="@((e) => ToggleProduct(product.Id, product.Quantity, (bool)e.Value!))" />
                                                             <label class="form-check-label" for="product-@product.Id">
                                                                 @product.Name
                                                             </label>
@@ -317,7 +317,13 @@
                     Status = order.Status,
                     WeekDay = order.WeekDay,
                     OrderType = order.OrderType,
-                    ProductIds = order.OrderProducts?.Select(op => op.ProductId).ToList() ?? new List<int>()
+                    ProductIds = order.OrderProducts?.Select(op => op.ProductId).ToList() ?? new List<int>(),
+                    OrderProducts = order.OrderProducts?.Select(op => new OrderProductDto
+                    {
+                        OrderId = op.OrderId,
+                        ProductId = op.ProductId,
+                        Product = op.Product
+                    }).ToList() ?? new List<OrderProductDto>()
                 };
             }
             else
@@ -331,7 +337,7 @@
         }
     }
 
-    private void ToggleProduct(int productId, bool isSelected)
+    private void ToggleProduct(int productId, int quantity, bool isSelected)
     {
         if (model == null) return;
 
@@ -340,13 +346,17 @@
             if (!model.ProductIds.Contains(productId))
             {
                 model.ProductIds.Add(productId);
-                model.SellingPrice = products?.Sum(p => p.SalePrice) ?? 0;
-                model.CostPrice = products?.Sum(p => p.CostPrice) ?? 0;
+                model.SellingPrice += products?.FirstOrDefault(es => es.Id == productId)!.SalePrice ?? 0;
+                model.CostPrice += products?.FirstOrDefault(es => es.Id == productId)!.CostPrice ?? 0;
+                model.OrderProducts.FirstOrDefault(es => es.OrderId == model.Id && es.ProductId == productId)!.Product.Quantity = quantity;
             }
         }
         else
         {
             model.ProductIds.Remove(productId);
+            model.SellingPrice -= products?.FirstOrDefault(es => es.Id == productId)!.SalePrice ?? 0;
+            model.CostPrice -= products?.FirstOrDefault(es => es.Id == productId)!.CostPrice ?? 0;
+            model.OrderProducts.FirstOrDefault(es => es.OrderId == model.Id && es.ProductId == productId)!.Product.Quantity = quantity;
         }
         StateHasChanged();
     }

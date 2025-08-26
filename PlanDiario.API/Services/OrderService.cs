@@ -84,6 +84,7 @@ namespace PlanDiario.API.Services
                 Description = request.Description,
                 CustomerId = request.CustomerId,
                 SellingPrice = request.SellingPrice,
+                CostPrice = request.CostPrice,
                 PeriodId = request.PeriodId,
                 PeriodName = string.Empty,
                 BusinessTypeId = request.BusinessTypeId,
@@ -124,6 +125,7 @@ namespace PlanDiario.API.Services
             order.Description = request.Description;
             order.CustomerId = request.CustomerId;
             order.SellingPrice = request.SellingPrice;
+            order.CostPrice = request.CostPrice;
             order.PeriodId = request.PeriodId;
             order.BusinessTypeId = request.BusinessTypeId;
             order.OrderStartDate = request.OrderStartDate;
@@ -138,9 +140,9 @@ namespace PlanDiario.API.Services
             {
                 var orderProduct = new OrderProduct
                 {
-                    OrderId = order.Id,
+                    OrderId = order!.Id,
                     ProductId = productId,
-                    Quantity = request.Quantity
+                    Quantity = order?.OrderProducts.FirstOrDefault(op => op.ProductId == productId)?.Quantity ?? 1
                 };
                 _context.Set<OrderProduct>().Add(orderProduct);
             }
@@ -215,6 +217,7 @@ namespace PlanDiario.API.Services
                     }
                 },
                 SellingPrice = order.SellingPrice,
+                CostPrice = order.CostPrice,
                 PeriodName = order.PeriodName,
                 PeriodId = order.PeriodId,
                 Period = new PeriodDto

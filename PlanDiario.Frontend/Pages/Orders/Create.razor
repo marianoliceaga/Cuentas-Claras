@@ -276,19 +276,23 @@
 
     private void ToggleProduct(int productId, int quantity, bool isSelected)
     {
+        //var order = OrderService.GetOrderByIdAsync(model.Id).Result;
+
         if (isSelected)
         {
             if (!model.ProductIds.Contains(productId))
             {
-                model.SellingPrice = products?.Sum(p => p.SalePrice) ?? 0;
-                model.CostPrice = products?.Sum(p => p.CostPrice) ?? 0;
                 model.ProductIds.Add(productId);
-                model.Quantity += quantity;
+                model.SellingPrice += products?.FirstOrDefault(es => es.Id == productId)!.SalePrice ?? 0;
+                model.CostPrice += products?.FirstOrDefault(es => es.Id == productId)!.CostPrice ?? 0;
             }
         }
         else
         {
             model.ProductIds.Remove(productId);
+            model.SellingPrice -= products?.FirstOrDefault(es => es.Id == productId)!.SalePrice ?? 0;
+            model.CostPrice -= products?.FirstOrDefault(es => es.Id == productId)!.CostPrice ?? 0;
+            //model.OrderProducts.FirstOrDefault(es => es.OrderId == model. && es.ProductId == productId)!.Product.Quantity = quantity;
         }
         StateHasChanged();
     }

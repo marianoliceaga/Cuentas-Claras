@@ -18,6 +18,6 @@ namespace PlanDiario.Application.DTOs
         public WeekDay WeekDay { get; set; } = WeekDay.Monday;
         public OrderType OrderType { get; set; } = OrderType.Product;
         public List<int> ProductIds { get; set; } = new List<int>();
-        public int Quantity { get; set; } = 1;
+        public List<OrderProductDto> OrderProducts { get; set; } = new List<OrderProductDto>();
     }
 }
