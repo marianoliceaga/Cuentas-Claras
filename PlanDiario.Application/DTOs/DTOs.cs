@@ -55,6 +55,7 @@
         public OrderDto Order { get; set; } = default!;
         public int ProductId { get; set; }
         public ProductDto Product { get; set; } = default!;
+        public int Quantity { get; set; }
     }
 
     public enum OrderStatus

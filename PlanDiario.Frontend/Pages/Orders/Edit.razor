@@ -179,20 +179,60 @@
                                         <label class="form-label">Productos</label>
                                         @if (products != null && products.Any())
                                         {
-                                            <div class="row">
-                                                @foreach (var product in products)
-                                                {
-                                                    <div class="col-md-4 col-sm-6 mb-2">
-                                                        <div class="form-check">
-                                                            <input type="checkbox" class="form-check-input" id="product-@product.Id"
-                                                                   checked="@(model.ProductIds.Contains(product.Id))"
-                                                                   @onchange="@((e) => ToggleProduct(product.Id, product.Quantity, (bool)e.Value!))" />
-                                                            <label class="form-check-label" for="product-@product.Id">
-                                                                @product.Name
-                                                            </label>
-                                                        </div>
-                                                    </div>
-                                                }
+                                            <div class="table-responsive">
+                                                <table class="table table-bordered">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Seleccionar</th>
+                                                            <th>Producto</th>
+                                                            <th>Cantidad</th>
+                                                            <th>Precio Unitario</th>
+                                                            <th>Total</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach (var product in products)
+                                                        {
+                                                            <tr>
+                                                                <td>
+                                                                    <div class="form-check">
+                                                                        <input type="checkbox" class="form-check-input" id="product-@product.Id"
+                                                                               checked="@(model.ProductIds.Contains(product.Id))"
+                                                                               @onchange="@((e) => ToggleProduct(product.Id, (bool)e.Value!))" />
+                                                                    </div>
+                                                                </td>
+                                                                <td>
+                                                                    <label class="form-check-label" for="product-@product.Id">
+                                                                        @product.Name
+                                                                    </label>
+                                                                </td>
+                                                                <td>
+                                                                    @if (selectedProductQuantities.ContainsKey(product.Id))
+                                                                    {
+                                                                        <input type="number" class="form-control" min="1" 
+                                                                               @bind:value="selectedProductQuantities[product.Id]"
+                                                                               @bind:value:after="(() => UpdateQuantity(product.Id))" />
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <span class="text-muted">-</span>
+                                                                    }
+                                                                </td>
+                                                                <td>@product.SalePrice.ToString("C", new System.Globalization.CultureInfo("es-AR"))</td>
+                                                                <td>
+                                                                    @if (selectedProductQuantities.ContainsKey(product.Id))
+                                                                    {
+                                                                        @((product.SalePrice * selectedProductQuantities[product.Id]).ToString("C", new System.Globalization.CultureInfo("es-AR")))
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <span class="text-muted">-</span>
+                                                                    }
+                                                                </td>
+                                                            </tr>
+                                                        }
+                                                    </tbody>
+                                                </table>
                                             </div>
                                         }
                                         else
@@ -248,6 +288,9 @@
     private List<PeriodDto>? periods;
     private List<BusinessTypeDto>? businessTypes;
     private List<ProductDto>? products;
+    
+    // Dictionary to track selected products and their quantities
+    private Dictionary<int, int> selectedProductQuantities = new Dictionary<int, int>();
 
     protected override async Task OnInitializedAsync()
     {
@@ -322,9 +365,16 @@
                     {
                         OrderId = op.OrderId,
                         ProductId = op.ProductId,
-                        Product = op.Product
+                        Product = op.Product,
+                        Quantity = op.Quantity
                     }).ToList() ?? new List<OrderProductDto>()
                 };
+
+                // Initialize the selectedProductQuantities dictionary with existing data
+                foreach (var orderProduct in order.OrderProducts ?? new List<OrderProductDto>())
+                {
+                    selectedProductQuantities[orderProduct.ProductId] = orderProduct.Quantity;
+                }
             }
             else
             {
@@ -337,28 +387,81 @@
         }
     }
 
-    private void ToggleProduct(int productId, int quantity, bool isSelected)
+    private void ToggleProduct(int productId, bool isSelected)
     {
         if (model == null) return;
+
+        var product = products?.FirstOrDefault(p => p.Id == productId);
+        if (product == null) return;
 
         if (isSelected)
         {
             if (!model.ProductIds.Contains(productId))
             {
                 model.ProductIds.Add(productId);
-                model.SellingPrice += products?.FirstOrDefault(es => es.Id == productId)!.SalePrice ?? 0;
-                model.CostPrice += products?.FirstOrDefault(es => es.Id == productId)!.CostPrice ?? 0;
-                model.OrderProducts.FirstOrDefault(es => es.OrderId == model.Id && es.ProductId == productId)!.Product.Quantity = quantity;
+                selectedProductQuantities[productId] = 1; // Default quantity
+                
+                // Add to OrderProducts collection
+                model.OrderProducts.Add(new OrderProductDto
+                {
+                    OrderId = model.Id,
+                    ProductId = productId,
+                    Product = product,
+                    Quantity = 1
+                });
             }
         }
         else
         {
             model.ProductIds.Remove(productId);
-            model.SellingPrice -= products?.FirstOrDefault(es => es.Id == productId)!.SalePrice ?? 0;
-            model.CostPrice -= products?.FirstOrDefault(es => es.Id == productId)!.CostPrice ?? 0;
-            model.OrderProducts.FirstOrDefault(es => es.OrderId == model.Id && es.ProductId == productId)!.Product.Quantity = quantity;
+            selectedProductQuantities.Remove(productId);
+            
+            // Remove from OrderProducts collection
+            var orderProductToRemove = model.OrderProducts.FirstOrDefault(op => op.ProductId == productId);
+            if (orderProductToRemove != null)
+            {
+                model.OrderProducts.Remove(orderProductToRemove);
+            }
         }
+        
+        RecalculatePrices();
         StateHasChanged();
+    }
+
+    private void UpdateQuantity(int productId)
+    {
+        if (!selectedProductQuantities.ContainsKey(productId)) return;
+
+        // Update the quantity in the OrderProducts collection
+        var orderProduct = model?.OrderProducts.FirstOrDefault(op => op.ProductId == productId);
+        if (orderProduct != null)
+        {
+            orderProduct.Quantity = selectedProductQuantities[productId];
+        }
+
+        RecalculatePrices();
+        StateHasChanged();
+    }
+
+    private void RecalculatePrices()
+    {
+        if (model == null) return;
+
+        decimal totalSellingPrice = 0;
+        decimal totalCostPrice = 0;
+
+        foreach (var kvp in selectedProductQuantities)
+        {
+            var product = products?.FirstOrDefault(p => p.Id == kvp.Key);
+            if (product != null)
+            {
+                totalSellingPrice += product.SalePrice * kvp.Value;
+                totalCostPrice += product.CostPrice * kvp.Value;
+            }
+        }
+
+        model.SellingPrice = totalSellingPrice;
+        model.CostPrice = totalCostPrice;
     }
 
     private async Task HandleValidSubmit()

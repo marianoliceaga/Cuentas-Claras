@@ -104,7 +104,7 @@ namespace PlanDiario.API.Services
                 {
                     OrderId = order.Id,
                     ProductId = productId,
-                    Quantity = request.Quantity
+                    Quantity = order.OrderProducts.FirstOrDefault(op => op.ProductId == productId)?.Quantity ?? 1
                 };
                 _context.Set<OrderProduct>().Add(orderProduct);
             }

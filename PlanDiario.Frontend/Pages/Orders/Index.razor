@@ -55,6 +55,7 @@
                                         <th>Estado</th>
                                         <th>Día Semana</th>
                                         <th>Tipo Orden</th>
+                                        <th>Productos</th>
                                         <th>Fecha Inicio</th>
                                         <th>Acciones</th>
                                     </tr>
@@ -76,6 +77,32 @@
                                             </td>
                                             <td>@GetWeekDayText(order.WeekDay)</td>
                                             <td>@GetOrderTypeText(order.OrderType)</td>
+                                            <td>
+                                                @if (order.OrderProducts?.Any() == true)
+                                                {
+                                                    <div class="d-flex flex-wrap gap-1">
+                                                        @foreach (var orderProduct in order.OrderProducts.Take(3))
+                                                        {
+                                                            <span class="badge bg-info text-dark" title="@orderProduct.Product?.Name - Cantidad: @orderProduct.Quantity">
+                                                                @(orderProduct.Product?.Name?.Length > 10
+                                                                                                                ? orderProduct.Product.Name.Substring(0, 10) + "..."
+                                                                                                                : orderProduct.Product?.Name)
+                                                <span class="badge bg-primary ms-1">@orderProduct.Quantity</span>
+                                            </span>
+                                                                                        }
+                                                        @if (order.OrderProducts.Count() > 3)
+                                                        {
+                                                            <span class="badge bg-secondary" title="@(order.OrderProducts.Count() - 3) productos adicionales">
+                                                                +@(order.OrderProducts.Count() - 3)
+                                                            </span>
+                                                        }
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">Sin productos</span>
+                                                }
+                                            </td>
                                             <td>@(order.OrderStartDate?.ToString("dd/MM/yyyy") ?? "N/A")</td>
                                             <td>
                                                 <div class="btn-group btn-group-sm" role="group">
