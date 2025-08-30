@@ -1,11 +1,17 @@
-﻿using Microsoft.EntityFrameworkCore;
-using PlanDiario.Infrastructure.Persistence;
-using PlanDiario.API.Services.Interfaces;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using PlanDiario.API.Services;
+using PlanDiario.API.Services.Interfaces;
+using PlanDiario.Infrastructure.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.Configure<ApiBehaviorOptions>(options =>
+{
+    options.SuppressModelStateInvalidFilter = true;
+});
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

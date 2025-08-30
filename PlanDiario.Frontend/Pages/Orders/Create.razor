@@ -172,10 +172,10 @@
                                                     <thead>
                                                         <tr>
                                                             <th>Seleccionar</th>
-                                                            <th>Producto</th>
+                                                            <th>Artículo</th>
                                                             <th>Cantidad</th>
-                                                            <th>Precio Unitario</th>
-                                                            <th>Total</th>
+                                                            <th>Precio</th>
+                                                            <th>Subtotal</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
@@ -197,8 +197,9 @@
                                                                     @if (selectedProductQuantities.ContainsKey(product.Id))
                                                                     {
                                                                         <input type="number" class="form-control" min="1" 
-                                                                               @bind="selectedProductQuantities[product.Id]" 
-                                                                               @bind:event="onchange" />
+                                                                               @bind="selectedProductQuantities[product.Id]"
+                                                                               @bind:event="oninput"
+                                                                               @bind:after="() => UpdateQuantity(product.Id)" />
                                                                     }
                                                                     else
                                                                     {

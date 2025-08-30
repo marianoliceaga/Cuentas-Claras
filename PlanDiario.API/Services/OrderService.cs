@@ -78,39 +78,52 @@ namespace PlanDiario.API.Services
 
         public async Task<OrderDto> CreateOrderAsync(CreateOrderRequest request)
         {
-            var order = new Order
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
             {
-                Id = Guid.NewGuid(),
-                Description = request.Description,
-                CustomerId = request.CustomerId,
-                SellingPrice = request.SellingPrice,
-                CostPrice = request.CostPrice,
-                PeriodId = request.PeriodId,
-                PeriodName = string.Empty,
-                BusinessTypeId = request.BusinessTypeId,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow,
-                OrderStartDate = request.OrderStartDate ?? DateTime.UtcNow,
-                Status = Domain.OrderStatus.Created,
-                WeekDay = (Domain.WeekDay)request.WeekDay,
-                OrderType = (Domain.OrderType)request.OrderType
-            };
-
-            _context.Orders.Add(order);
-
-            foreach (var productId in request.ProductIds)
-            {
-                var orderProduct = new OrderProduct
+                var order = new Order
                 {
-                    OrderId = order.Id,
-                    ProductId = productId,
-                    Quantity = order.OrderProducts.FirstOrDefault(op => op.ProductId == productId)?.Quantity ?? 1
+                    Id = Guid.NewGuid(),
+                    Description = request.Description,
+                    CustomerId = request.CustomerId,
+                    SellingPrice = request.SellingPrice,
+                    CostPrice = request.CostPrice,
+                    PeriodId = request.PeriodId,
+                    PeriodName = string.Empty,
+                    BusinessTypeId = request.BusinessTypeId,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow,
+                    OrderStartDate = request.OrderStartDate ?? DateTime.UtcNow,
+                    Status = Domain.OrderStatus.Created,
+                    WeekDay = (Domain.WeekDay)request.WeekDay,
+                    OrderType = (Domain.OrderType)request.OrderType
                 };
-                _context.Set<OrderProduct>().Add(orderProduct);
-            }
 
-            await _context.SaveChangesAsync();
-            return await GetOrderByIdAsync(order.Id) ?? throw new InvalidOperationException("Order not found after creation");
+                _context.Orders.Add(order);
+                await _context.SaveChangesAsync(); // Save the Order first
+
+                // Create OrderProduct entities using the quantities from the request
+                foreach (var orderProductRequest in request.OrderProducts)
+                {
+                    var orderProduct = new OrderProduct
+                    {
+                        OrderId = order.Id,
+                        ProductId = orderProductRequest.ProductId,
+                        Quantity = orderProductRequest.Quantity,
+                    };
+                    _context.Set<OrderProduct>().Add(orderProduct);
+                }
+
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                return await GetOrderByIdAsync(order.Id) ?? throw new InvalidOperationException("Order not found after creation");
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
         }
 
         public async Task<OrderDto> UpdateOrderAsync(UpdateOrderRequest request)
@@ -242,6 +255,7 @@ namespace PlanDiario.API.Services
                     Id = op.Id,
                     OrderId = op.OrderId,
                     ProductId = op.ProductId,
+                    Quantity = op.Quantity,
                     Product = new ProductDto
                     {
                         Id = op.Product.Id,

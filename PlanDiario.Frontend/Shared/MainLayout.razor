@@ -1,15 +1,24 @@
 ﻿@inherits LayoutComponentBase
-<div class="page">
-    <div class="sidebar">
-        @* <NavMenu /> *@
-    </div>
 
-    <main>
-        <div class="top-row px-4">
-            <a href="/">Plan Diario Menu Principal</a>
-        </div>
-        <article class="content px-4">
-            @Body
-        </article>
-    </main>
+<div class="layout-container d-flex">
+    @if (isNavMenuVisible)
+    {
+        <NavMenu />
+    }
+
+    <div class="main-content flex-fill">
+        <button class="btn btn-primary m-2" @onclick="ToggleNavMenu">
+            @(isNavMenuVisible ? "Ocultar Menu" : "Mostrar Menu")
+        </button>
+        @Body
+    </div>
 </div>
+
+@code {
+    private bool isNavMenuVisible = true;
+
+    private void ToggleNavMenu()
+    {
+        isNavMenuVisible = !isNavMenuVisible;
+    }
+}

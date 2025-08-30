@@ -187,8 +187,7 @@
                                                             <th>Artículo</th>
                                                             <th>Cantidad</th>
                                                             <th>Precio</th>
-                                                            <th>Costo</th>
-                                                            <th>Total</th>
+                                                            <th>Subtotal</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
@@ -210,9 +209,10 @@
                                                                 <td>
                                                                     @if (selectedProductQuantities.ContainsKey(product.Id))
                                                                     {
-                                                                        <input type="number" class="form-control" min="1" 
-                                                                               @bind:value="selectedProductQuantities[product.Id]"
-                                                                               @bind:value:after="(() => UpdateQuantity(product.Id))" />
+                                                                        <input type="number" class="form-control" min="1"
+                                                                               @bind="selectedProductQuantities[product.Id]"
+                                                                               @bind:event="oninput"
+                                                                               @bind:after="() => UpdateQuantity(product.Id)" />
                                                                     }
                                                                     else
                                                                     {
@@ -224,17 +224,6 @@
                                                                     @if (selectedProductQuantities.ContainsKey(product.Id))
                                                                     {
                                                                         @((product.SalePrice * selectedProductQuantities[product.Id]).ToString("C", new System.Globalization.CultureInfo("es-AR")))
-                                                                    }
-                                                                    else
-                                                                    {
-                                                                        <span class="text-muted">-</span>
-                                                                    }
-                                                                </td>
-                                                                <td>@product.CostPrice.ToString("C", new System.Globalization.CultureInfo("es-AR"))</td>
-                                                                <td>
-                                                                    @if (selectedProductQuantitiesCost.ContainsKey(product.Id))
-                                                                    {
-                                                                        @((product.CostPrice * selectedProductQuantitiesCost[product.Id]).ToString("C", new System.Globalization.CultureInfo("es-AR")))
                                                                     }
                                                                     else
                                                                     {
