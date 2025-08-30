@@ -19,13 +19,13 @@
             </div>
 
             <div class="mb-3">
-                <label class="form-label">Name <span class="text-danger">*</span></label>
+                <label class="form-label">Nombre <span class="text-danger">*</span></label>
                 <InputText @bind-Value="Model.Name" class="form-control" disabled="@IsLoading" />
                 <ValidationMessage For="() => Model.Name" />
             </div>
 
             <div class="mb-3">
-                <label class="form-label">Last Name <span class="text-danger">*</span></label>
+                <label class="form-label">Apellido <span class="text-danger">*</span></label>
                 <InputText @bind-Value="Model.LastName" class="form-control" disabled="@IsLoading" />
                 <ValidationMessage For="() => Model.LastName" />
             </div>
@@ -37,13 +37,13 @@
             </div>
 
             <div class="mb-3">
-                <label class="form-label">Phone 1</label>
+                <label class="form-label">Teléfono 1</label>
                 <InputText @bind-Value="Model.Phone1" class="form-control" disabled="@IsLoading" />
                 <ValidationMessage For="() => Model.Phone1" />
             </div>
 
             <div class="mb-3">
-                <label class="form-label">Phone 2</label>
+                <label class="form-label">Teléfono 2</label>
                 <InputText @bind-Value="Model.Phone2" class="form-control" disabled="@IsLoading" />
                 <ValidationMessage For="() => Model.Phone2" />
             </div>
@@ -51,27 +51,27 @@
 
         <div class="col-md-6">
             <div class="mb-3">
-                <label class="form-label">Phone 3</label>
+                <label class="form-label">Teléfono 3</label>
                 <InputText @bind-Value="Model.Phone3" class="form-control" disabled="@IsLoading" />
                 <ValidationMessage For="() => Model.Phone3" />
             </div>
 
             <div class="mb-3">
-                <label class="form-label">Address 1</label>
+                <label class="form-label">Dirección 1</label>
                 <InputText @bind-Value="Model.Address1" class="form-control" disabled="@IsLoading" />
                 <ValidationMessage For="() => Model.Address1" />
             </div>
 
             <div class="mb-3">
-                <label class="form-label">Address 2</label>
+                <label class="form-label">Dirección 2</label>
                 <InputText @bind-Value="Model.Address2" class="form-control" disabled="@IsLoading" />
                 <ValidationMessage For="() => Model.Address2" />
             </div>
 
             <div class="mb-3">
-                <label class="form-label">Locality <span class="text-danger">*</span></label>
+                <label class="form-label">Localidad <span class="text-danger">*</span></label>
                 <InputSelect @bind-Value="Model.LocalityId" class="form-control" disabled="@IsLoading">
-                    <option value="0">-- Select Locality --</option>
+                    <option value="0">-- Elegir Localidad --</option>
                     @if (localities != null)
                     {
                         @foreach (var locality in localities)
@@ -84,9 +84,9 @@
             </div>
 
             <div class="mb-3">
-                <label class="form-label">Collector <span class="text-danger">*</span></label>
+                <label class="form-label">Cobrador <span class="text-danger">*</span></label>
                 <InputSelect @bind-Value="Model.CollectorId" class="form-control" disabled="@IsLoading">
-                    <option value="0">-- Select Collector --</option>
+                    <option value="0">-- Elegir Cobrador --</option>
                     @if (collectors != null)
                     {
                         @foreach (var collector in collectors)
@@ -99,9 +99,9 @@
             </div>
 
             <div class="mb-3">
-                <label class="form-label">Salesman <span class="text-danger">*</span></label>
+                <label class="form-label">Vendedor <span class="text-danger">*</span></label>
                 <InputSelect @bind-Value="Model.SalesmanId" class="form-control" disabled="@IsLoading">
-                    <option value="0">-- Select Salesman --</option>
+                    <option value="0">-- Elegir Vendedor --</option>
                     @if (salesmen != null)
                     {
                         @foreach (var salesman in salesmen)
@@ -117,14 +117,14 @@
 
     <div class="d-flex justify-content-end gap-2">
         <button type="button" class="btn btn-secondary" @onclick="OnCancel" disabled="@IsLoading">
-            Cancel
+            Cancelar
         </button>
         <button type="submit" class="btn btn-primary" disabled="@IsLoading">
             @if (IsLoading)
             {
                 <span class="spinner-border spinner-border-sm me-2" role="status"></span>
             }
-            Update Customer
+            Actualizar Cliente
         </button>
     </div>
 </EditForm>
@@ -155,7 +155,7 @@
         catch (Exception ex)
         {
             // Log the error or handle it appropriately
-            Console.WriteLine($"Error loading lookup data: {ex.Message}");
+            Console.WriteLine($"Error cargando datos de lookup: {ex.Message}");
         }
     }
 }

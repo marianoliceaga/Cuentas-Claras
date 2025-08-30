@@ -5,12 +5,12 @@
 @inject NavigationManager Navigation
 @inject IJSRuntime JSRuntime
 
-<PageTitle>Customers</PageTitle>
+<PageTitle>Clientes</PageTitle>
 
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h3>Customers</h3>
     <button class="btn btn-primary" @onclick="NavigateToCreate">
-        <i class="fas fa-plus"></i> New Customer
+        <i class="fas fa-plus"></i> Nuevo Cliente
     </button>
 </div>
 
@@ -26,7 +26,7 @@ else if (customers?.Any() == true)
 {
     <div class="row mb-3">
         <div class="col-md-6">
-            <input type="text" class="form-control" placeholder="Search by name or DNI..."
+            <input type="text" class="form-control" placeholder="Buscar por nombre o DNI"
                    @bind="searchTerm" @onkeyup="FilterCustomers" />
         </div>
     </div>
@@ -36,12 +36,12 @@ else if (customers?.Any() == true)
             <thead class="table-dark">
                 <tr>
                     <th>DNI</th>
-                    <th>Name</th>
-                    <th>Phone</th>
-                    <th>Locality</th>
-                    <th>Collector</th>
-                    <th>Salesman</th>
-                    <th>Actions</th>
+                    <th>Nombre</th>
+                    <th>Teléfono</th>
+                    <th>Localidad</th>
+                    <th>Cobrador</th>
+                    <th>Vendedor</th>
+                    <th>Acciones</th>
                 </tr>
             </thead>
             <tbody>
@@ -79,7 +79,7 @@ else if (customers?.Any() == true)
 else
 {
     <div class="alert alert-info">
-        <i class="fas fa-info-circle"></i> No customers found.
+        <i class="fas fa-info-circle"></i> No se encontraron clientes.
     </div>
 }
 
@@ -127,7 +127,7 @@ else
     private async Task DeleteCustomer(CustomerDto customer)
     {
         var confirmed = await JSRuntime.InvokeAsync<bool>("confirm",
-            $"Are you sure you want to delete {customer.Name} {customer.LastName}?");
+            $"Está seguro que desea borrar a {customer.Name} {customer.LastName}?");
 
         if (confirmed)
         {
@@ -138,7 +138,7 @@ else
             }
             else
             {
-                await JSRuntime.InvokeVoidAsync("alert", "Failed to delete customer.");
+                await JSRuntime.InvokeVoidAsync("alert", "No se pudo borrar al cliente. Error.");
             }
         }
     }

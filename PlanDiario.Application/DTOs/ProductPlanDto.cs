@@ -16,13 +16,10 @@ namespace PlanDiario.Application.DTOs
         public ProductDto? Product { get; set; }
         public PlanDto? Plan { get; set; }
 
-        public int Quantity { get; set; } // Added Quantity
-        public decimal ProductPrice { get; set; } // Added ProductPrice
         public string PlanName { get; set; } = string.Empty; // Added PlanName
         public string ProductName { get; set; } = string.Empty; // Added ProductName
         public string CategoryName { get; set; } = string.Empty; // Added CategoryName
         public string SubcategoryName { get; set; } = string.Empty; // Added SubcategoryName
-        public string Notes { get; set; } = string.Empty; // Added Notes
     }
 
     public class CreateProductPlanDto

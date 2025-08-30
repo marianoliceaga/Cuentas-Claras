@@ -5,12 +5,12 @@
 @inject NavigationManager Navigation
 @inject IJSRuntime JSRuntime
 
-<PageTitle>Create Customer</PageTitle>
+<PageTitle>Crear Cliente</PageTitle>
 
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h3>Create New Customer</h3>
+    <h3>Nuevo Cliente</h3>
     <button class="btn btn-secondary" @onclick="GoBack">
-        <i class="fas fa-arrow-left"></i> Back to List
+        <i class="fas fa-arrow-left"></i> Volver a la lista
     </button>
 </div>
 
@@ -41,7 +41,7 @@
             var dniExists = await CustomerService.CustomerExistsByDNIAsync(createRequest.DNI);
             if (dniExists)
             {
-                await JSRuntime.InvokeVoidAsync("alert", "A customer with this DNI already exists.");
+                await JSRuntime.InvokeVoidAsync("alert", "Ya existe un cliente con este DNI.");
                 isLoading = false;
                 return;
             }
@@ -51,7 +51,7 @@
         }
         catch (Exception ex)
         {
-            await JSRuntime.InvokeVoidAsync("alert", $"Error creating customer: {ex.Message}");
+            await JSRuntime.InvokeVoidAsync("alert", $"Error creando cliente: {ex.Message}");
         }
         finally
         {

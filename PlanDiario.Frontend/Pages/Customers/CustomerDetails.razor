@@ -4,7 +4,7 @@
 @inject ICustomerService CustomerService
 @inject NavigationManager Navigation
 
-<PageTitle>Customer Details</PageTitle>
+<PageTitle>Detalles de Cliente</PageTitle>
 
 @if (loading)
 {
@@ -17,13 +17,13 @@
 else if (customer != null)
 {
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h3>Customer Details</h3>
+        <h3>Detalles de Cliente</h3>
         <div>
             <button class="btn btn-primary me-2" @onclick="() => NavigateToEdit()">
-                <i class="fas fa-edit"></i> Edit
+                <i class="fas fa-edit"></i> Editar
             </button>
             <button class="btn btn-secondary" @onclick="GoBack">
-                <i class="fas fa-arrow-left"></i> Back to List
+                <i class="fas fa-arrow-left"></i> Volver a la lista
             </button>
         </div>
     </div>
@@ -41,10 +41,10 @@ else if (customer != null)
                                 <dt class="col-sm-4">DNI:</dt>
                                 <dd class="col-sm-8">@customer.DNI</dd>
 
-                                <dt class="col-sm-4">Name:</dt>
+                                <dt class="col-sm-4">Nombre:</dt>
                                 <dd class="col-sm-8">@customer.Name</dd>
 
-                                <dt class="col-sm-4">Last Name:</dt>
+                                <dt class="col-sm-4">Apellido:</dt>
                                 <dd class="col-sm-8">@customer.LastName</dd>
 
                                 <dt class="col-sm-4">Email:</dt>
@@ -53,13 +53,13 @@ else if (customer != null)
                         </div>
                         <div class="col-md-6">
                             <dl class="row">
-                                <dt class="col-sm-4">Phone 1:</dt>
+                                <dt class="col-sm-4">Teléfono 1:</dt>
                                 <dd class="col-sm-8">@customer.Phone1</dd>
 
-                                <dt class="col-sm-4">Phone 2:</dt>
+                                <dt class="col-sm-4">Teléfono 2:</dt>
                                 <dd class="col-sm-8">@customer.Phone2</dd>
 
-                                <dt class="col-sm-4">Phone 3:</dt>
+                                <dt class="col-sm-4">Teléfono 3:</dt>
                                 <dd class="col-sm-8">@customer.Phone3</dd>
                             </dl>
                         </div>
@@ -67,26 +67,26 @@ else if (customer != null)
 
                     <hr />
 
-                    <h6>Address Information</h6>
+                    <h6>Dirección</h6>
                     <dl class="row">
-                        <dt class="col-sm-2">Address 1:</dt>
+                        <dt class="col-sm-2">Dirección 1:</dt>
                         <dd class="col-sm-4">@customer.Address1</dd>
 
-                        <dt class="col-sm-2">Address 2:</dt>
+                        <dt class="col-sm-2">Dirección 2:</dt>
                         <dd class="col-sm-4">@customer.Address2</dd>
 
-                        <dt class="col-sm-2">Locality:</dt>
+                        <dt class="col-sm-2">Localidad:</dt>
                         <dd class="col-sm-4">@customer.Locality?.Name</dd>
                     </dl>
 
                     <hr />
 
-                    <h6>Business Information</h6>
+                    <h6>Información del Negocio</h6>
                     <dl class="row">
-                        <dt class="col-sm-2">Collector:</dt>
+                        <dt class="col-sm-2">Cobrador:</dt>
                         <dd class="col-sm-4">@customer.Collector?.Name</dd>
 
-                        <dt class="col-sm-2">Salesman:</dt>
+                        <dt class="col-sm-2">Vendedor:</dt>
                         <dd class="col-sm-4">@customer.Salesman?.Name</dd>
                     </dl>
                 </div>
@@ -97,7 +97,7 @@ else if (customer != null)
 else
 {
     <div class="alert alert-danger">
-        <i class="fas fa-exclamation-triangle"></i> Customer not found.
+        <i class="fas fa-exclamation-triangle"></i> Cliente no encotrado.
     </div>
 }
 

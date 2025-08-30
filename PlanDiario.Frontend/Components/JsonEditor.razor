@@ -1,0 +1,135 @@
+﻿@using System.Text.Json.Nodes
+@using System.Text.Json
+
+@if (Node is JsonObject obj)
+{
+    <div class="ms-3 border p-2 rounded">
+        <strong>Características</strong>
+
+        @foreach (var kv in obj.ToList())
+        {
+            <div class="d-flex mb-2">
+                <input class="form-control me-2" style="max-width:150px"
+                       value="@kv.Key"
+                       @onchange="e => RenameKey(obj, kv.Key, e.Value?.ToString())" />
+
+                <JsonEditor Node="kv.Value!" OnChanged="TriggerChanged" />
+
+                <button type="button" class="btn btn-sm btn-danger ms-2"
+                        @onclick="@(() => { obj.Remove(kv.Key); TriggerChanged(); })">
+                    X
+                </button>
+            </div>
+        }
+
+        <!-- ✅ FIX: call a method instead of inline code with ["..."] -->
+        <button type="button" class="btn btn-sm btn-secondary mt-1"
+                @onclick="@(() => AddProperty(obj))">
+            + Propiedad
+        </button>
+    </div>
+}
+@* else if (Node is JsonArray arr)
+{
+    <div class="ms-3 border p-2 rounded">
+        <strong>Arreglo</strong>
+
+        @for (int i = 0; i < arr.Count; i++)
+        {
+            var index = i;
+            <!-- this is the trick -->
+            <div class="d-flex mb-2">
+                <JsonEditor Node="arr[i]!" OnChanged="TriggerChanged" />
+                <button type="button" class="btn btn-sm btn-danger ms-2"
+                        @onclick="@(() => { arr.RemoveAt(i); TriggerChanged(); })">
+                    X
+                </button>
+            </div>
+        }
+
+        <!-- ✅ FIX: call a method that adds a JsonValue -->
+        <button type="button" class="btn btn-sm btn-secondary mt-1"
+                @onclick="@(() => AddElement(arr))">
+            + Elemento
+        </button>
+    </div>
+} *@
+else if (Node is JsonValue)
+{
+    <input class="form-control"
+           value="@Node.ToJsonString().Trim('"', '\"')"
+           @onchange="e => UpdateValue(e.Value?.ToString())" />
+}
+
+@code {
+    [Parameter] public JsonNode Node { get; set; } = default!;
+    [Parameter] public EventCallback OnChanged { get; set; }
+
+    // --- Helpers for Objeto ---
+    private void AddProperty(JsonObject obj)
+    {
+        // ensure unique key
+        var baseKey = "NuevaClave";
+        var key = baseKey;
+        var i = 1;
+        while (obj.ContainsKey(key)) key = $"{baseKey}{i++}";
+
+        obj[key] = JsonValue.Create(string.Empty);
+        TriggerChanged();
+    }
+
+    private void RenameKey(JsonObject obj, string oldKey, string? newKey)
+    {
+        if (string.IsNullOrWhiteSpace(newKey) || newKey == oldKey) return;
+        var value = obj[oldKey];
+        obj.Remove(oldKey);
+        obj[newKey] = value!;
+        TriggerChanged();
+    }
+
+    // --- Helpers for Arreglo ---
+    private void AddElement(JsonArray arr)
+    {
+        arr.Add(JsonValue.Create(string.Empty));
+        TriggerChanged();
+    }
+
+    // --- Value editing (replace in parent so the tree actually updates) ---
+    private void UpdateValue(string? newVal)
+    {
+        var replacement = JsonValue.Create(newVal ?? string.Empty);
+
+        if (Node.Parent is JsonArray parentArray)
+        {
+            for (int i = 0; i < parentArray.Count; i++)
+            {
+                if (ReferenceEquals(parentArray[i], Node))
+                {
+                    parentArray[i] = replacement;
+                    break;
+                }
+            }
+        }
+        else if (Node.Parent is JsonObject parentObject)
+        {
+            foreach (var kv in parentObject.ToList())
+            {
+                if (ReferenceEquals(kv.Value, Node))
+                {
+                    parentObject[kv.Key] = replacement;
+                    break;
+                }
+            }
+        }
+
+        Node = replacement; // keep component state in sync
+        TriggerChanged();
+    }
+
+    private void TriggerChanged()
+    {
+        if (OnChanged.HasDelegate)
+            OnChanged.InvokeAsync();
+        StateHasChanged();
+    }
+}

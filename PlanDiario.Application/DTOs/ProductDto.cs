@@ -17,7 +17,7 @@ namespace PlanDiario.Application.DTOs
         public byte[]? Image { get; set; }
         public int SubcategoryId { get; set; }
         public string ProviderUrl { get; set; } = string.Empty;
-
+        public int Quantity { get; set; }
         // Related entities
         public SubcategoryDto? Subcategory { get; set; }
     }
@@ -32,6 +32,7 @@ namespace PlanDiario.Application.DTOs
         public byte[]? Image { get; set; }
         public int SubcategoryId { get; set; }
         public string ProviderUrl { get; set; } = string.Empty;
+        public int Quantity { get; set; }
     }
 
     public class UpdateProductDto
@@ -44,5 +45,6 @@ namespace PlanDiario.Application.DTOs
         public byte[]? Image { get; set; }
         public int SubcategoryId { get; set; }
         public string ProviderUrl { get; set; } = string.Empty;
+        public int Quantity { get; set; }
     }
 }

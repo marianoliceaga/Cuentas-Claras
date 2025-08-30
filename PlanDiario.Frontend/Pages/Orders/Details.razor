@@ -1,0 +1,314 @@
+﻿@page "/orders/details/{Id:guid}"
+@using PlanDiario.Application.DTOs
+@using PlanDiario.Frontend.Services
+@using System.Globalization
+@inject IOrderService OrderService
+@inject NavigationManager Navigation
+@inject IJSRuntime JSRuntime
+
+<PageTitle>Detalles de Orden</PageTitle>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Detalles de Orden</h3>
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-warning me-2" @onclick="EditOrder" disabled="@(order == null)">
+                            <i class="fas fa-edit me-1"></i> Editarar
+                        </button>
+                        <button type="button" class="btn btn-danger me-2" @onclick="DeleteOrder" disabled="@(order == null)">
+                            <i class="fas fa-trash me-1"></i> Eliminar
+                        </button>
+                        <button type="button" class="btn btn-secondary" @onclick="GoBack">
+                            <i class="fas fa-arrow-left"></i> Volver a la lista
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    @if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            @errorMessage
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+                        </div>
+                    }
+
+                    @if (isLoading)
+                    {
+                        <div class="d-flex justify-content-center">
+                            <div class="spinner-border" role="status">
+                                <span class="visually-hidden">Cargando...</span>
+                            </div>
+                        </div>
+                    }
+                    else if (order != null)
+                    {
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h5>Información General</h5>
+                                <table class="table table-borderless">
+                                    <tr>
+                                        <td><strong>ID:</strong></td>
+                                        <td>@order.Id</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Descripción:</strong></td>
+                                        <td>@order.Description</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Cliente:</strong></td>
+                                        <td>@order.Customer?.Name @order.Customer?.LastName</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Precio de Venta:</strong></td>
+                                        <td>@order.SellingPrice.ToString("C", new CultureInfo("es-AR"))</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Costo:</strong></td>
+                                        <td>@order.CostPrice.ToString("C", new CultureInfo("es-AR"))</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Estado:</strong></td>
+                                        <td>
+                                            <span class="badge bg-@GetStatusBadgeColor(order.Status) fs-6">
+                                                @GetStatusText(order.Status)
+                                            </span>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="col-md-6">
+                                <h5>Información de Configuración</h5>
+                                <table class="table table-borderless">
+                                    <tr>
+                                        <td><strong>Período:</strong></td>
+                                        <td>@order.Period?.Name</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Tipo de Negocio:</strong></td>
+                                        <td>@order.BusinessType?.Name</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Día de la Semana:</strong></td>
+                                        <td>@GetWeekDayText(order.WeekDay)</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Tipo de Orden:</strong></td>
+                                        <td>@GetOrderTypeText(order.OrderType)</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Fecha de Inicio:</strong></td>
+                                        <td>@(order.OrderStartDate?.ToString("dd/MM/yyyy") ?? "No especificada")</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="row mt-4">
+                            <div class="col-3">
+                                <h5>Fechas de Sistema</h5>
+                                <table class="table table-borderless">
+                                    <tr>
+                                        <td><strong>Fecha de Creación:</strong></td>
+                                        <td>@order.CreatedAt!.Value.ToString("dd/MM/yyyy HH:mm:ss")</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Última Actualización:</strong></td>
+                                        <td>@order.UpdatedAt!.Value.ToString("dd/MM/yyyy HH:mm:ss")</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        @if (order.OrderProducts?.Any() == true)
+                        {
+                            <div class="row mt-4">
+                                <div class="col-12">
+                                    <h5>Productos Asociados</h5>
+                                    <div class="table-responsive">
+                                        <table class="table table-striped table-bordered">
+                                            <thead>
+                                                <tr>
+                                                    <th>ID Producto</th>
+                                                    <th>Nombre del Producto</th>
+                                                    <th>Cantidad</th>
+                                                    <th>Precio</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach (var orderProduct in order.OrderProducts)
+                                                {
+                                                    <tr>
+                                                        <td>@orderProduct.ProductId</td>
+                                                        <td>@orderProduct.Product?.Name</td>
+                                                        <td>
+                                                            <span class="badge bg-primary fs-6">@orderProduct.Quantity</span>
+                                                        </td>
+                                                        <td>@(orderProduct.Product?.SalePrice.ToString("C", new CultureInfo("es-AR")) ?? "N/A")</td>
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                            <tfoot>
+                                                <tr class="table-dark">
+                                                    <td colspan="4"><strong>Total</strong></td>
+                                                    <td><strong>@(order.SellingPrice.ToString("C", new CultureInfo("es-AR")))</strong></td>
+                                                </tr>
+                                            </tfoot>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="row mt-4">
+                                <div class="col-12">
+                                    <h5>Productos Asociados</h5>
+                                    <p class="text-muted">No hay productos asociados a esta orden.</p>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="text-center py-4">
+                            <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
+                            <h5>Orden no encontrada</h5>
+                            <p class="text-muted">La orden solicitada no existe o no se pudo cargar.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public Guid Id { get; set; }
+
+    private OrderDto? order;
+    private bool isLoading = false;
+    private string errorMessage = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadOrder();
+    }
+
+    private async Task LoadOrder()
+    {
+        try
+        {
+            isLoading = true;
+            errorMessage = string.Empty;
+            StateHasChanged();
+
+            order = await OrderService.GetOrderByIdAsync(Id);
+
+            if (order == null)
+            {
+                errorMessage = "Orden no encontrada.";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error al cargar la orden: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private void EditOrder()
+    {
+        if (order != null)
+        {
+            Navigation.NavigateTo($"/orders/edit/{order.Id}");
+        }
+    }
+
+    private async Task DeleteOrder()
+    {
+        if (order == null) return;
+
+        var confirmed = await JSRuntime.InvokeAsync<bool>("confirm", "¿Está seguro de que desea eliminar esta orden?");
+        if (confirmed)
+        {
+            try
+            {
+                var result = await OrderService.DeleteOrderAsync(order.Id);
+                if (result)
+                {
+                    await JSRuntime.InvokeVoidAsync("alert", "Orden eliminada exitosamente!");
+                    Navigation.NavigateTo("/orders");
+                }
+                else
+                {
+                    await JSRuntime.InvokeVoidAsync("showToast", "error", "Error al eliminar la orden.");
+                }
+            }
+            catch (Exception ex)
+            {
+                await JSRuntime.InvokeVoidAsync("showToast", "error", $"Error: {ex.Message}");
+            }
+        }
+    }
+
+    private void GoBack()
+    {
+        Navigation.NavigateTo("/orders");
+    }
+
+    private string GetStatusBadgeColor(OrderStatus status)
+    {
+        return status switch
+        {
+            OrderStatus.Created => "secondary",
+            OrderStatus.InProgress => "warning",
+            OrderStatus.Completed => "success",
+            OrderStatus.Cancelled => "danger",
+            _ => "secondary"
+        };
+    }
+
+    private string GetStatusText(OrderStatus status)
+    {
+        return status switch
+        {
+            OrderStatus.Created => "Creada",
+            OrderStatus.InProgress => "En Progreso",
+            OrderStatus.Completed => "Completada",
+            OrderStatus.Cancelled => "Cancelada",
+            _ => status.ToString()
+        };
+    }
+
+    private string GetWeekDayText(WeekDay weekDay)
+    {
+        return weekDay switch
+        {
+            WeekDay.Monday => "Lunes",
+            WeekDay.Tuesday => "Martes",
+            WeekDay.Wednesday => "Miércoles",
+            WeekDay.Thursday => "Jueves",
+            WeekDay.Friday => "Viernes",
+            WeekDay.Saturday => "Sábado",
+            WeekDay.Sunday => "Domingo",
+            _ => weekDay.ToString()
+        };
+    }
+
+    private string GetOrderTypeText(OrderType orderType)
+    {
+        return orderType switch
+        {
+            OrderType.Product => "Producto",
+            OrderType.Cash => "Efectivo",
+            _ => orderType.ToString()
+        };
+    }
+}

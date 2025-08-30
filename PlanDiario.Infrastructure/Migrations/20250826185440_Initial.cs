@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace PlanDiario.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class Initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -221,11 +221,12 @@ namespace PlanDiario.Infrastructure.Migrations
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CustomerId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     SellingPrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    CostPrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     PeriodName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     PeriodId = table.Column<int>(type: "int", nullable: false),
                     BusinessTypeId = table.Column<int>(type: "int", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETDATE()"),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETDATE()"),
                     OrderStartDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     WeekDay = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -239,19 +240,19 @@ namespace PlanDiario.Infrastructure.Migrations
                         column: x => x.BusinessTypeId,
                         principalTable: "BusinessTypes",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Orders_Customers_CustomerId",
                         column: x => x.CustomerId,
                         principalTable: "Customers",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Orders_Periods_PeriodId",
                         column: x => x.PeriodId,
                         principalTable: "Periods",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -266,9 +267,9 @@ namespace PlanDiario.Infrastructure.Migrations
                     CostPrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     SalePrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     Image = table.Column<byte[]>(type: "varbinary(max)", nullable: true),
-                    idSubcategory = table.Column<int>(type: "int", nullable: false),
+                    SubcategoryId = table.Column<int>(type: "int", nullable: false),
                     ProviderUrl = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
-                    SubcategoryId = table.Column<int>(type: "int", nullable: true)
+                    SubcategoryId1 = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -277,13 +278,13 @@ namespace PlanDiario.Infrastructure.Migrations
                         name: "FK_Products_Subcategories_SubcategoryId",
                         column: x => x.SubcategoryId,
                         principalTable: "Subcategories",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_Products_Subcategories_idSubcategory",
-                        column: x => x.idSubcategory,
-                        principalTable: "Subcategories",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Products_Subcategories_SubcategoryId1",
+                        column: x => x.SubcategoryId1,
+                        principalTable: "Subcategories",
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -315,7 +316,8 @@ namespace PlanDiario.Infrastructure.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     OrderId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ProductId = table.Column<int>(type: "int", nullable: false)
+                    ProductId = table.Column<int>(type: "int", nullable: false),
+                    Quantity = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -854,14 +856,14 @@ namespace PlanDiario.Infrastructure.Migrations
 
             migrationBuilder.InsertData(
                 table: "Products",
-                columns: new[] { "Id", "Characteristics", "CostPrice", "Description", "Image", "Name", "ProviderUrl", "SalePrice", "SubcategoryId", "idSubcategory" },
+                columns: new[] { "Id", "Characteristics", "CostPrice", "Description", "Image", "Name", "ProviderUrl", "SalePrice", "SubcategoryId", "SubcategoryId1" },
                 values: new object[,]
                 {
-                    { 1, "{\"Color\":\"Blanco\",\"Altura\":\"80 cm\"}", 1000m, "Silla liviana de polipropileno, apta uso interior/exterior.", null, "Silla Plástica Apilable", "https://proveedor.example/silla-plastica", 1999m, null, 1 },
-                    { 2, "{\"Color\":\"Gris\",\"Largo\":\"180 cm\"}", 5200m, "Mesa plegable rectangular con estructura metálica.", null, "Mesa Plegable 1,80 m", "https://proveedor.example/mesa-plegable", 8490m, null, 1 },
-                    { 3, "{\"Color\":\"Blanco\",\"Capacidad\":\"400 L\"}", 148000m, "Heladera exhibidora vertical, puerta de vidrio.", null, "Heladera Comercial 400 L", "https://proveedor.example/heladera-400l", 214900m, null, 2 },
-                    { 4, "{\"Color\":\"Negro\",\"Potencia\":\"800 W\"}", 42000m, "Microondas digital con grill y 8 programas automáticos.", null, "Microondas 23 L", "https://proveedor.example/microondas-23l", 62990m, null, 2 },
-                    { 5, "{\"Color\":\"Blanco Frío\",\"Lumens\":\"1900\"}", 1100m, "Lámpara LED industrial, 6500 K, 220 V.", null, "Lámpara LED 20 W", "https://proveedor.example/lampara-led", 1990m, null, 3 }
+                    { 1, "{\"Color\":\"Blanco\",\"Altura\":\"80 cm\"}", 1000m, "Silla liviana de polipropileno, apta uso interior/exterior.", null, "Silla Plástica Apilable", "https://proveedor.example/silla-plastica", 1999m, 1, null },
+                    { 2, "{\"Color\":\"Gris\",\"Largo\":\"180 cm\"}", 5200m, "Mesa plegable rectangular con estructura metálica.", null, "Mesa Plegable 1,80 m", "https://proveedor.example/mesa-plegable", 8490m, 1, null },
+                    { 3, "{\"Color\":\"Blanco\",\"Capacidad\":\"400 L\"}", 148000m, "Heladera exhibidora vertical, puerta de vidrio.", null, "Heladera Comercial 400 L", "https://proveedor.example/heladera-400l", 214900m, 2, null },
+                    { 4, "{\"Color\":\"Negro\",\"Potencia\":\"800 W\"}", 42000m, "Microondas digital con grill y 8 programas automáticos.", null, "Microondas 23 L", "https://proveedor.example/microondas-23l", 62990m, 2, null },
+                    { 5, "{\"Color\":\"Blanco Frío\",\"Lumens\":\"1900\"}", 1100m, "Lámpara LED industrial, 6500 K, 220 V.", null, "Lámpara LED 20 W", "https://proveedor.example/lampara-led", 1990m, 3, null }
                 });
 
             migrationBuilder.InsertData(
@@ -909,9 +911,10 @@ namespace PlanDiario.Infrastructure.Migrations
                 column: "DepartmentId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_OrderProducts_OrderId",
+                name: "IX_OrderProducts_OrderId_ProductId",
                 table: "OrderProducts",
-                column: "OrderId");
+                columns: new[] { "OrderId", "ProductId" },
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_OrderProducts_ProductId",
@@ -950,14 +953,14 @@ namespace PlanDiario.Infrastructure.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Products_idSubcategory",
-                table: "Products",
-                column: "idSubcategory");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Products_SubcategoryId",
                 table: "Products",
                 column: "SubcategoryId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Products_SubcategoryId1",
+                table: "Products",
+                column: "SubcategoryId1");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Subcategories_CategoryId",

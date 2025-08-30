@@ -16,7 +16,6 @@ builder.Services.AddScoped<ILookupService, LookupService>();
 builder.Services.AddScoped<ILocalityService, LocalityService>();
 builder.Services.AddScoped<ICollectorService, CollectorService>();
 builder.Services.AddScoped<ISalesmanService, SalesmanService>();
-builder.Services.AddScoped<ICollectorService, CollectorService>();
 builder.Services.AddScoped<IPlanService, PlanService>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IProductPlanService, ProductPlanService>();

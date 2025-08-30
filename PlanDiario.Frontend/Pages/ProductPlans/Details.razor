@@ -1,134 +1,299 @@
-﻿@page "/productplans/{id:int}"
+﻿@page "/productplans/details/{id:int}"
 @using PlanDiario.Application.DTOs
 @using PlanDiario.Frontend.Services
 @inject IProductPlanService ProductPlanService
 @inject NavigationManager Navigation
 @inject IJSRuntime JSRuntime
-@inject IPlanService PlanService
 
-<PageTitle>Product Plan Details</PageTitle>
+<PageTitle>Detalles Artículo/Plan</PageTitle>
 
-<div class="container">
-    @if (loading)
-    {
-        <div class="text-center">
-            <div class="spinner-border" role="status">
-                <span class="visually-hidden">Cargando...</span>
-            </div>
-        </div>
-    }
-    else if (plans != null && plans.Any())
-    {
-        <div class="row">
-            <div class="col-md-8 mx-auto">
-                <div class="card">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h3>Product Plan Details</h3>
-                        <div>
-                        </div>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Detalles Artículo/Plan</h3>
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-secondary me-2" @onclick="GoBack">
+                            <i class="fas fa-arrow-left"></i> Volver a la lista
+                        </button>
+                        @if (productPlan != null)
+                        {
+                            <button type="button" class="btn btn-primary me-2" @onclick="() => EditProductPlan(productPlan.Id)">
+                                <i class="fas fa-edit"></i> Editarar
+                            </button>
+                            <button type="button" class="btn btn-danger" @onclick="() => ConfirmDelete(productPlan.Id)">
+                                <i class="fas fa-trash"></i> Borrar
+                            </button>
+                        }
                     </div>
-
-                    @* Pagination *@
-                    @if (totalPages > 1)
+                </div>
+                <div class="card-body">
+                    @if (isLoading)
                     {
-                        <nav aria-label="Plans pagination">
-                            <ul class="pagination justify-content-center">
-                                <li class="page-item @(currentPage == 1 ? "disabled" : "")">
-                                    <button class="page-link" @onclick="() => LoadPage(currentPage - 1)" disabled="@(currentPage == 1)">Previous</button>
-                                </li>
-                                @for (int i = 1; i <= totalPages; i++)
+                        <div class="d-flex justify-content-center py-5">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Cargando...</span>
+                            </div>
+                        </div>
+                    }
+                    else if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        <div class="alert alert-danger" role="alert">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            @errorMessage
+                        </div>
+                    }
+                    else if (productPlan != null)
+                    {
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5 class="card-title mb-0">Información</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row mb-3">
+                                            <div class="col-sm-4">
+                                                <strong>ID:</strong>
+                                            </div>
+                                            <div class="col-sm-8">
+                                                @productPlan.Id
+                                            </div>
+                                        </div>
+                                        <div class="row mb-3">
+                                            <div class="col-sm-4">
+                                                <strong>Product ID:</strong>
+                                            </div>
+                                            <div class="col-sm-8">
+                                                @productPlan.ProductId
+                                            </div>
+                                        </div>
+                                        <div class="row mb-3">
+                                            <div class="col-sm-4">
+                                                <strong>Plan ID:</strong>
+                                            </div>
+                                            <div class="col-sm-8">
+                                                @productPlan.PlanId
+                                            </div>
+                                        </div>
+
+                                        @if (!string.IsNullOrEmpty(productPlan.ProductName))
+                                        {
+                                            <div class="row mb-3">
+                                                <div class="col-sm-4">
+                                                    <strong>Nombre del artículo:</strong>
+                                                </div>
+                                                <div class="col-sm-8">
+                                                    @productPlan.ProductName
+                                                </div>
+                                            </div>
+                                        }
+
+                                        @if (!string.IsNullOrEmpty(productPlan.PlanName))
+                                        {
+                                            <div class="row mb-3">
+                                                <div class="col-sm-4">
+                                                    <strong>Nombre del Plan:</strong>
+                                                </div>
+                                                <div class="col-sm-8">
+                                                    @productPlan.PlanName
+                                                </div>
+                                            </div>
+                                        }
+
+                                        @if (!string.IsNullOrEmpty(productPlan.CategoryName))
+                                        {
+                                            <div class="row mb-3">
+                                                <div class="col-sm-4">
+                                                    <strong>Categoría:</strong>
+                                                </div>
+                                                <div class="col-sm-8">
+                                                    @productPlan.CategoryName
+                                                </div>
+                                            </div>
+                                        }
+
+                                        @if (!string.IsNullOrEmpty(productPlan.SubcategoryName))
+                                        {
+                                            <div class="row mb-3">
+                                                <div class="col-sm-4">
+                                                    <strong>Subcategoría:</strong>
+                                                </div>
+                                                <div class="col-sm-8">
+                                                    @productPlan.SubcategoryName
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5 class="card-title mb-0">Acciones</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="d-grid gap-2">
+                                            <button type="button" class="btn btn-primary" @onclick="() => EditProductPlan(productPlan.Id)">
+                                                <i class="fas fa-edit me-2"></i>Editar Artículo/Plan
+                                            </button>
+                                            <button type="button" class="btn btn-outline-danger" @onclick="() => ConfirmDelete(productPlan.Id)">
+                                                <i class="fas fa-trash me-2"></i>Borrar Artículo/Plan
+                                            </button>
+                                            <button type="button" class="btn btn-outline-secondary" @onclick="GoBack">
+                                                <i class="fas fa-list me-2"></i>Volver a la lista
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                @if (productPlan.Product != null)
                                 {
-                                    int pagination = i;
-                                    <li class="page-item @(currentPage == pagination ? "active" : "")">
-                                        <button class="page-link" @onclick="() => LoadPage(pagination)">@pagination</button>
-                                    </li>
+                                    <div class="card mt-3">
+                                        <div class="card-header">
+                                            <h5 class="card-title mb-0">Detalles del Producto</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <p><strong>ID:</strong> @productPlan.Product.Id</p>
+                                            @if (!string.IsNullOrEmpty(productPlan.Product.Name))
+                                            {
+                                                <p><strong>Nombre:</strong> @productPlan.Product.Name</p>
+                                            }
+                                            @if (!string.IsNullOrEmpty(productPlan.Product.Description))
+                                            {
+                                                <p><strong>Descripción:</strong> @productPlan.Product.Description</p>
+                                            }
+                                        </div>
+                                    </div>
                                 }
-                                <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
-                                    <button class="page-link" @onclick="() => LoadPage(currentPage + 1)" disabled="@(currentPage == totalPages)">Next</button>
-                                </li>
-                            </ul>
-                        </nav>
+
+                                @if (productPlan.Plan != null)
+                                {
+                                    <div class="card mt-3">
+                                        <div class="card-header">
+                                            <h5 class="card-title mb-0">Detalles del Plan</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <p><strong>ID:</strong> @productPlan.Plan.Id</p>
+                                            @if (!string.IsNullOrEmpty(productPlan.Plan.Name))
+                                            {
+                                                <p><strong>Nombre:</strong> @productPlan.Plan.Name</p>
+                                            }
+                                            @if (!string.IsNullOrEmpty(productPlan.Plan.Description))
+                                            {
+                                                <p><strong>Descripción:</strong> @productPlan.Plan.Description</p>
+                                            }
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info" role="alert">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Artículo/Plan no encontrado.
+                        </div>
                     }
                 </div>
             </div>
         </div>
-    }
-    else
-    {
-        <div class="alert alert-info">
-            <i class="fas fa-info-circle"></i> No plans found.
-        </div>
-    }
+    </div>
 </div>
 
 @code {
-    private List<PlanDto> plans = new();
-    private bool loading = true;
-    private string searchTerm = "";
-    private int currentPage = 1;
-    private int pageSize = 10;
-    private int totalPages = 1;
+    [Parameter] public int Id { get; set; }
 
-    [Parameter]
-    public int Id { get; set; }
+    private ProductPlanDto? productPlan;
+    private bool isLoading = true;
+    private string errorMessage = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
-        await LoadPlans();
+        await LoadProductPlan();
     }
 
-    private async Task LoadPlans()
+    protected override async Task OnParametersSetAsync()
     {
-        loading = true;
-        var result = await PlanService.GetAllAsync(currentPage, pageSize, searchTerm);
-
-        if (result?.Success == true && result.Data != null)
+        if (productPlan?.Id != Id)
         {
-            plans = result.Data.Items;
-            totalPages = result.Data.TotalPages;
-        }
-        else
-        {
-            plans = new List<PlanDto>();
-        }
-
-        loading = false;
-    }
-
-    private async Task LoadPage(int page)
-    {
-        currentPage = page;
-        await LoadPlans();
-    }
-
-    private async Task SearchPlans()
-    {
-        currentPage = 1;
-        await LoadPlans();
-    }
-
-    private async Task OnSearchKeyPress(KeyboardEventArgs e)
-    {
-        if (e.Key == "Enter")
-        {
-            await SearchPlans();
+            await LoadProductPlan();
         }
     }
 
-    private async Task DeletePlan(int id)
+    private async Task LoadProductPlan()
     {
-        if (await JSRuntime.InvokeAsync<bool>("confirm", "Are you sure you want to delete this plan?"))
+        try
         {
-            var result = await PlanService.DeleteAsync(id);
-            if (result?.Success == true)
+            isLoading = true;
+            errorMessage = string.Empty;
+            StateHasChanged();
+
+            var response = await ProductPlanService.GetByIdAsync(Id);
+
+            if (response?.Success == true && response.Data != null)
             {
-                await LoadPlans();
-                await JSRuntime.InvokeVoidAsync("alert", "Plan deleted successfully!");
+                productPlan = response.Data;
             }
             else
             {
-                await JSRuntime.InvokeVoidAsync("alert", $"Error deleting plan: {result?.Message}");
+                errorMessage = response?.Message ?? "Product Plan not found.";
+                productPlan = null;
             }
         }
+        catch (Exception ex)
+        {
+            errorMessage = $"An error occurred while loading the product plan: {ex.Message}";
+            productPlan = null;
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private void EditProductPlan(int id)
+    {
+        Navigation.NavigateTo($"/productplans/edit/{id}");
+    }
+
+    private async Task ConfirmDelete(int id)
+    {
+        var confirmed = await JSRuntime.InvokeAsync<bool>("confirm", "Are you sure you want to delete this product plan? This action cannot be undone.");
+        if (confirmed)
+        {
+            await DeleteProductPlan(id);
+        }
+    }
+
+    private async Task DeleteProductPlan(int id)
+    {
+        try
+        {
+            var response = await ProductPlanService.DeleteAsync(id);
+
+            if (response?.Success == true)
+            {
+                await JSRuntime.InvokeVoidAsync("alert", "Product Plan deleted successfully!");
+                Navigation.NavigateTo("/productplans");
+            }
+            else
+            {
+                await JSRuntime.InvokeVoidAsync("alert", "error", response?.Message ?? "An error occurred while deleting the product plan.");
+            }
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", "error", $"An error occurred: {ex.Message}");
+        }
+    }
+
+    private void GoBack()
+    {
+        Navigation.NavigateTo("/productplans");
     }
 }

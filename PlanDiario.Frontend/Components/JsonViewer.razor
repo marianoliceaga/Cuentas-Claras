@@ -1,0 +1,33 @@
+﻿@using System.Text.Json.Nodes
+
+@if (Node is JsonObject obj)
+{
+    <div class="ms-3 border-start ps-2">
+        @foreach (var kv in obj)
+        {
+            <div>
+                <strong>@kv.Key:</strong>
+                <JsonViewer Node="kv.Value!" />
+            </div>
+        }
+    </div>
+}
+else if (Node is JsonArray arr)
+{
+    <ul>
+        @foreach (var item in arr)
+        {
+            <li>
+                <JsonViewer Node="item!" />
+            </li>
+        }
+    </ul>
+}
+else if (Node is JsonValue val)
+{
+    <span>@val.ToString()</span>
+}
+
+@code {
+    [Parameter] public JsonNode Node { get; set; } = default!;
+}

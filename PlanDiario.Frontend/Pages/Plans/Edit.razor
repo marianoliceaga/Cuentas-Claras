@@ -35,11 +35,21 @@
                             </div>
 
                             <div class="mb-3">
-                                <label for="commission" class="form-label">Porcentaje de Comision</label>
-                                <InputNumber id="commission" class="form-control" @bind-Value="updatePlanDto.StartDate"
-                                             min="0" max="100" />
-                                <ValidationMessage For="@(() => currentCollector.CommisionPercentage)" class="text-danger" />
-                                <div class="form-text">Porcentaje (0-100)</div>
+                                <label for="createDate" class="form-label">Fecha de Creación *</label>
+                                <InputDate id="createDate" class="form-control" @bind-Value="updatePlanDto.StartDate" />
+                                <ValidationMessage For="@(() => updatePlanDto.StartDate)" />
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="createDate" class="form-label">Fecha de Finalización *</label>
+                                <InputDate id="endDate" class="form-control" @bind-Value="updatePlanDto.EndDate" />
+                                <ValidationMessage For="@(() => updatePlanDto.EndDate)" />
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="name" class="form-label">Tasa de Interés *</label>
+                                <InputNumber id="name" class="form-control" @bind-Value="updatePlanDto.InterestRate" />
+                                <ValidationMessage For="@(() => updatePlanDto.InterestRate)" />
                             </div>
 
                              <div class="d-flex justify-content-between">
@@ -51,7 +61,7 @@
                                     {
                                         <span class="spinner-border spinner-border-sm me-2"></span>
                                     }
-                                    <i class="fas fa-save"></i> Update Plan
+                                    <i class="fas fa-save"></i> Actualizar Plan
                                 </button>
                             </div>
                         </EditForm>
@@ -86,7 +96,6 @@
             updatePlanDto.InterestRate = result.Data.InterestRate;
             updatePlanDto.StartDate = result.Data.StartDate;
             updatePlanDto.EndDate = result.Data.EndDate;
-
             planFound = true;
         }
 

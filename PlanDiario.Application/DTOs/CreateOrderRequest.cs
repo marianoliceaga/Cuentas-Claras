@@ -11,11 +11,13 @@ namespace PlanDiario.Application.DTOs
         public string Description { get; set; } = string.Empty;
         public Guid CustomerId { get; set; }
         public decimal SellingPrice { get; set; }
+        public decimal CostPrice { get; set; }
         public int PeriodId { get; set; }
         public int BusinessTypeId { get; set; }
         public DateTime? OrderStartDate { get; set; }
         public WeekDay WeekDay { get; set; } = WeekDay.Monday;
         public OrderType OrderType { get; set; } = OrderType.Product;
         public List<int> ProductIds { get; set; } = new List<int>();
+        public List<OrderProductDto> OrderProducts { get; set; } = new List<OrderProductDto>();
     }
 }
