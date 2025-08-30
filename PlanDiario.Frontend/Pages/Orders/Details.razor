@@ -16,7 +16,7 @@
                     <h3 class="card-title">Detalles de Orden</h3>
                     <div class="card-tools">
                         <button type="button" class="btn btn-warning me-2" @onclick="EditOrder" disabled="@(order == null)">
-                            <i class="fas fa-edit me-1"></i> Editar
+                            <i class="fas fa-edit me-1"></i> Editarar
                         </button>
                         <button type="button" class="btn btn-danger me-2" @onclick="DeleteOrder" disabled="@(order == null)">
                             <i class="fas fa-trash me-1"></i> Eliminar
@@ -59,7 +59,7 @@
                                     </tr>
                                     <tr>
                                         <td><strong>Cliente:</strong></td>
-                                        <td>@order.Customer?.Name</td>
+                                        <td>@order.Customer?.Name @order.Customer?.LastName</td>
                                     </tr>
                                     <tr>
                                         <td><strong>Precio de Venta:</strong></td>
@@ -107,7 +107,7 @@
                         </div>
 
                         <div class="row mt-4">
-                            <div class="col-12">
+                            <div class="col-3">
                                 <h5>Fechas de Sistema</h5>
                                 <table class="table table-borderless">
                                     <tr>
@@ -134,8 +134,7 @@
                                                     <th>ID Producto</th>
                                                     <th>Nombre del Producto</th>
                                                     <th>Cantidad</th>
-                                                    <th>Precio Unitario</th>
-                                                    <th>Subtotal</th>
+                                                    <th>Precio</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -148,23 +147,13 @@
                                                             <span class="badge bg-primary fs-6">@orderProduct.Quantity</span>
                                                         </td>
                                                         <td>@(orderProduct.Product?.SalePrice.ToString("C", new CultureInfo("es-AR")) ?? "N/A")</td>
-                                                        <td>
-                                                            @if (orderProduct.Product?.SalePrice != null)
-                                                            {
-                                                                @((orderProduct.Product.SalePrice * orderProduct.Quantity).ToString("C", new CultureInfo("es-AR")))
-                                                            }
-                                                            else
-                                                            {
-                                                                <span class="text-muted">N/A</span>
-                                                            }
-                                                        </td>
                                                     </tr>
                                                 }
                                             </tbody>
                                             <tfoot>
                                                 <tr class="table-dark">
                                                     <td colspan="4"><strong>Total</strong></td>
-                                                    <td><strong>@order.SellingPrice.ToString("C", new CultureInfo("es-AR"))</strong></td>
+                                                    <td><strong>@(order.SellingPrice.ToString("C", new CultureInfo("es-AR")))</strong></td>
                                                 </tr>
                                             </tfoot>
                                         </table>

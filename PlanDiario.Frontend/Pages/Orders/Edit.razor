@@ -184,9 +184,10 @@
                                                     <thead>
                                                         <tr>
                                                             <th>Seleccionar</th>
-                                                            <th>Producto</th>
+                                                            <th>Artículo</th>
                                                             <th>Cantidad</th>
-                                                            <th>Precio Unitario</th>
+                                                            <th>Precio</th>
+                                                            <th>Costo</th>
                                                             <th>Total</th>
                                                         </tr>
                                                     </thead>
@@ -223,6 +224,17 @@
                                                                     @if (selectedProductQuantities.ContainsKey(product.Id))
                                                                     {
                                                                         @((product.SalePrice * selectedProductQuantities[product.Id]).ToString("C", new System.Globalization.CultureInfo("es-AR")))
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <span class="text-muted">-</span>
+                                                                    }
+                                                                </td>
+                                                                <td>@product.CostPrice.ToString("C", new System.Globalization.CultureInfo("es-AR"))</td>
+                                                                <td>
+                                                                    @if (selectedProductQuantitiesCost.ContainsKey(product.Id))
+                                                                    {
+                                                                        @((product.CostPrice * selectedProductQuantitiesCost[product.Id]).ToString("C", new System.Globalization.CultureInfo("es-AR")))
                                                                     }
                                                                     else
                                                                     {
@@ -291,6 +303,8 @@
     
     // Dictionary to track selected products and their quantities
     private Dictionary<int, int> selectedProductQuantities = new Dictionary<int, int>();
+
+    private Dictionary<int, int> selectedProductQuantitiesCost = new Dictionary<int, int>();
 
     protected override async Task OnInitializedAsync()
     {

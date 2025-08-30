@@ -5,7 +5,7 @@
 @inject IProductPlanService ProductPlanService
 @inject NavigationManager Navigation
 
-<PageTitle>Plan Details</PageTitle>
+<PageTitle>Detalles del Plan</PageTitle>
 
 <div class="container">
     @if (loading)
@@ -28,9 +28,9 @@
                                 <i class="fas fa-edit"></i> Editar
                             </NavLink>
 
-                            @* <NavLink class="btn btn-success" href="@($"/plans/{plan.Id}/products")">
-                                <i class="fas fa-box"></i> Administrar Articulos
-                            </NavLink> *@
+                            <NavLink class="btn btn-success" href="@($"/plans/{plan.Id}/products")">
+                                <i class="fas fa-box"></i> Administrar Artículos
+                            </NavLink>
 S                       </div>
                     </div>
                     <div class="card-body">
@@ -72,7 +72,7 @@ S                       </div>
                                     <div class="list-group-item">
                                         <div class="d-flex w-100 justify-content-between">
                                             <h6 class="mb-1">@productPlan.ProductName</h6>
-                                            @* <small>Qty: @productPlan.Quantity</small> *@
+                                             @* <small>Qty: @productPlan.</small> *@
                                         </div>
                                     </div>
                                 }

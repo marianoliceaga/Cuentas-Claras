@@ -5,14 +5,14 @@
 @inject NavigationManager Navigation
 @inject IJSRuntime JSRuntime
 
-<PageTitle>Create Plan</PageTitle>
+<PageTitle>Crear Plan</PageTitle>
 
 <div class="container">
     <div class="row">
         <div class="col-md-8 mx-auto">
             <div class="card">
                 <div class="card-header">
-                    <h3>Create New Plan</h3>
+                    <h3>Crear Plan</h3>
                 </div>
                 <div class="card-body">
                     <EditForm Model="createPlanDto" OnValidSubmit="HandleValidSubmit">
@@ -75,12 +75,12 @@
 
         if (result?.Success == true)
         {
-            await JSRuntime.InvokeVoidAsync("alert", "Plan created successfully!");
+            await JSRuntime.InvokeVoidAsync("alert", "Plan creado exitosamente!");
             Navigation.NavigateTo("/plans");
         }
         else
         {
-            await JSRuntime.InvokeVoidAsync("alert", $"Error creating plan: {result?.Message}");
+            await JSRuntime.InvokeVoidAsync("alert", $"Error creando plan: {result?.Message}");
         }
 
         loading = false;
