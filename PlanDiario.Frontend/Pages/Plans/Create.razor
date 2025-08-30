@@ -68,6 +68,19 @@
     private CreatePlanDto createPlanDto = new();
     private bool loading = false;
 
+    protected override void OnInitialized()
+    {
+        if (createPlanDto.StartDate == DateTime.MinValue)
+        {
+            createPlanDto.StartDate = DateTime.UtcNow;
+        }
+
+        if(createPlanDto.EndDate == DateTime.MinValue)
+        {
+            createPlanDto.EndDate = DateTime.UtcNow.AddYears(1);
+        }
+    }
+
     private async Task HandleValidSubmit()
     {
         loading = true;

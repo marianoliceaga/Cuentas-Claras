@@ -88,14 +88,13 @@
     <div class="modal-backdrop fade show"></div>
 }
 
-@* Modal container: clicking outside closes; clicks inside do NOT bubble *@
+@* Modal container: clicking outside will NOT close the modal anymore *@
 <div class="modal fade @(showModal ? "show d-block" : "")"
      tabindex="-1"
      role="dialog"
      aria-modal="@(showModal ? "true" : null)"
-     style="@(showModal ? "display:block" : "display:none")"
-     @onclick="HandleOutsideClick">
-    <div class="modal-dialog modal-lg" role="document" @onclick:stopPropagation>
+     style="@(showModal ? "display:block" : "display:none")">
+    <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">
@@ -231,11 +230,11 @@
         StateHasChanged();
     }
 
-    private async Task HandleOutsideClick()
-    {
-        // Clicking the shaded area outside the dialog closes the modal
-        await HideModal();
-    }
+    // This method is no longer needed since we removed the outside click functionality
+    // private async Task HandleOutsideClick()
+    // {
+    //     await HideModal();
+    // }
 
     private async Task SaveSalesman()
     {

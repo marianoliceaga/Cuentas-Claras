@@ -450,16 +450,19 @@
     {
         if (model == null) return;
 
-        decimal totalSellingPrice = 0;
-        decimal totalCostPrice = 0;
+        decimal totalSellingPrice = 0m;
+        decimal totalCostPrice = 0m;
 
         foreach (var kvp in selectedProductQuantities)
         {
             var product = products?.FirstOrDefault(p => p.Id == kvp.Key);
-            if (product != null)
+            if (product != null && kvp.Value > 0)
             {
-                totalSellingPrice += product.SalePrice * kvp.Value;
-                totalCostPrice += product.CostPrice * kvp.Value;
+                var productSubtotal = product.SalePrice * kvp.Value;
+                var productCostSubtotal = product.CostPrice * kvp.Value;
+
+                totalSellingPrice += productSubtotal;
+                totalCostPrice += productCostSubtotal;
             }
         }
 

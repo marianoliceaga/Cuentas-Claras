@@ -20,7 +20,7 @@
                         @if (productPlan != null)
                         {
                             <button type="button" class="btn btn-primary me-2" @onclick="() => EditProductPlan(productPlan.Id)">
-                                <i class="fas fa-edit"></i> Editarar
+                                <i class="fas fa-edit"></i> Editar
                             </button>
                             <button type="button" class="btn btn-danger" @onclick="() => ConfirmDelete(productPlan.Id)">
                                 <i class="fas fa-trash"></i> Borrar
@@ -240,13 +240,13 @@
             }
             else
             {
-                errorMessage = response?.Message ?? "Product Plan not found.";
+                errorMessage = response?.Message ?? "No se encontró.";
                 productPlan = null;
             }
         }
         catch (Exception ex)
         {
-            errorMessage = $"An error occurred while loading the product plan: {ex.Message}";
+            errorMessage = $"Ocurrió un error cargando el Artículo/Producto: {ex.Message}";
             productPlan = null;
         }
         finally
@@ -263,7 +263,7 @@
 
     private async Task ConfirmDelete(int id)
     {
-        var confirmed = await JSRuntime.InvokeAsync<bool>("confirm", "Are you sure you want to delete this product plan? This action cannot be undone.");
+        var confirmed = await JSRuntime.InvokeAsync<bool>("confirm", "Está seguro que quiere borrar esta relación?");
         if (confirmed)
         {
             await DeleteProductPlan(id);
@@ -278,17 +278,17 @@
 
             if (response?.Success == true)
             {
-                await JSRuntime.InvokeVoidAsync("alert", "Product Plan deleted successfully!");
+                await JSRuntime.InvokeVoidAsync("alert", "Borrado exitosamente!");
                 Navigation.NavigateTo("/productplans");
             }
             else
             {
-                await JSRuntime.InvokeVoidAsync("alert", "error", response?.Message ?? "An error occurred while deleting the product plan.");
+                await JSRuntime.InvokeVoidAsync("alert", "error", response?.Message ?? "Ocurrió un error borrando la relación.");
             }
         }
         catch (Exception ex)
         {
-            await JSRuntime.InvokeVoidAsync("alert", "error", $"An error occurred: {ex.Message}");
+            await JSRuntime.InvokeVoidAsync("alert", "error", $"Ocurrió un error: {ex.Message}");
         }
     }
 

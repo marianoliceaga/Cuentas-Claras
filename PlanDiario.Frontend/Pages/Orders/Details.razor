@@ -16,7 +16,7 @@
                     <h3 class="card-title">Detalles de Orden</h3>
                     <div class="card-tools">
                         <button type="button" class="btn btn-warning me-2" @onclick="EditOrder" disabled="@(order == null)">
-                            <i class="fas fa-edit me-1"></i> Editarar
+                            <i class="fas fa-edit me-1"></i> Editar
                         </button>
                         <button type="button" class="btn btn-danger me-2" @onclick="DeleteOrder" disabled="@(order == null)">
                             <i class="fas fa-trash me-1"></i> Eliminar
@@ -248,12 +248,12 @@
                 }
                 else
                 {
-                    await JSRuntime.InvokeVoidAsync("showToast", "error", "Error al eliminar la orden.");
+                    await JSRuntime.InvokeVoidAsync("alert", "Error al eliminar la orden.");
                 }
             }
             catch (Exception ex)
             {
-                await JSRuntime.InvokeVoidAsync("showToast", "error", $"Error: {ex.Message}");
+                await JSRuntime.InvokeVoidAsync("alert", $"Error: {ex.Message}");
             }
         }
     }
