@@ -1,0 +1,471 @@
+﻿@page "/orders/create"
+@using CuentasClaras.Application.DTOs
+@using CuentasClaras.Frontend.Services
+@inject IOrderService OrderService
+@inject ICustomerService CustomerService
+@inject ILookupService LookupService
+@inject IProductService ProductService
+@inject NavigationManager Navigation
+@inject IJSRuntime JSRuntime
+
+<PageTitle>Crear Nueva Orden</PageTitle>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Crear Nueva Orden</h3>
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-secondary" @onclick="GoBack">
+                            <i class="fas fa-arrow-left"></i> Volver a la lista
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    @if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            @errorMessage
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+                        </div>
+                    }
+
+                    @if (!string.IsNullOrEmpty(successMessage))
+                    {
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            @successMessage
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+                        </div>
+                    }
+
+                    @if (isLoadingData)
+                    {
+                        <div class="d-flex justify-content-center">
+                            <div class="spinner-border" role="status">
+                                <span class="visually-hidden">Cargando...</span>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <EditForm Model="@model" OnValidSubmit="@HandleValidSubmit" OnInvalidSubmit="@HandleInvalidSubmit">
+                            <DataAnnotationsValidator />
+                            <ValidationSummary class="text-danger" />
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label for="description" class="form-label">Descripción <span class="text-danger">*</span></label>
+                                        <InputText id="description" class="form-control" @bind-Value="model.Description" />
+                                        <ValidationMessage For="@(() => model.Description)" class="text-danger" />
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label for="customerId" class="form-label">Cliente <span class="text-danger">*</span></label>
+                                        <InputSelect id="customerId" class="form-select" @bind-Value="model.CustomerId">
+                                            <option value="@Guid.Empty">-- Seleccionar Cliente --</option>
+                                            @if (customers != null)
+                                            {
+                                                @foreach (var customer in customers)
+                                                {
+                                                    <option value="@customer.Id">@customer.Name @customer.LastName</option>
+                                                }
+                                            }
+                                        </InputSelect>
+                                        <ValidationMessage For="@(() => model.CustomerId)" class="text-danger" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group mb-3">
+                                        <label for="sellingPrice" class="form-label">Precio de Venta <span class="text-danger">*</span></label>
+                                        <InputNumber id="sellingPrice" class="form-control" @bind-Value="model.SellingPrice" />
+                                        <ValidationMessage For="@(() => model.SellingPrice)" class="text-danger" />
+                                    </div>
+                                    <div class="form-group mb-3">
+                                        <label for="costPrice" class="form-label">Costo <span class="text-danger">*</span></label>
+                                        <InputNumber id="costPrice" class="form-control" @bind-Value="model.CostPrice" />
+                                        <ValidationMessage For="@(() => model.CostPrice)" class="text-danger" />
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group mb-3">
+                                        <label for="periodId" class="form-label">Período <span class="text-danger">*</span></label>
+                                        <InputSelect id="periodId" class="form-select" @bind-Value="model.PeriodId">
+                                            <option value="0">-- Seleccionar Período --</option>
+                                            @if (periods != null)
+                                            {
+                                                @foreach (var period in periods)
+                                                {
+                                                    <option value="@period.Id">@period.Name</option>
+                                                }
+                                            }
+                                        </InputSelect>
+                                        <ValidationMessage For="@(() => model.PeriodId)" class="text-danger" />
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group mb-3">
+                                        <label for="businessTypeId" class="form-label">Tipo de Negocio <span class="text-danger">*</span></label>
+                                        <InputSelect id="businessTypeId" class="form-select" @bind-Value="model.BusinessTypeId">
+                                            <option value="0">-- Seleccionar Tipo --</option>
+                                            @if (businessTypes != null)
+                                            {
+                                                @foreach (var businessType in businessTypes)
+                                                {
+                                                    <option value="@businessType.Id">@businessType.Name</option>
+                                                }
+                                            }
+                                        </InputSelect>
+                                        <ValidationMessage For="@(() => model.BusinessTypeId)" class="text-danger" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group mb-3">
+                                        <label for="orderStartDate" class="form-label">Fecha de Inicio</label>
+                                        <InputDate id="orderStartDate" class="form-control" @bind-Value="model.OrderStartDate" />
+                                        <ValidationMessage For="@(() => model.OrderStartDate)" class="text-danger" />
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group mb-3">
+                                        <label for="weekDay" class="form-label">Día de la Semana <span class="text-danger">*</span></label>
+                                        <InputSelect id="weekDay" class="form-select" @bind-Value="model.WeekDay">
+                                            <option value="@WeekDay.Monday">Lunes</option>
+                                            <option value="@WeekDay.Tuesday">Martes</option>
+                                            <option value="@WeekDay.Wednesday">Miércoles</option>
+                                            <option value="@WeekDay.Thursday">Jueves</option>
+                                            <option value="@WeekDay.Friday">Viernes</option>
+                                            <option value="@WeekDay.Saturday">Sábado</option>
+                                            <option value="@WeekDay.Sunday">Domingo</option>
+                                        </InputSelect>
+                                        <ValidationMessage For="@(() => model.WeekDay)" class="text-danger" />
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group mb-3">
+                                        <label for="orderType" class="form-label">Tipo de Orden <span class="text-danger">*</span></label>
+                                        <InputSelect id="orderType" class="form-select" @bind-Value="model.OrderType">
+                                            <option value="@OrderType.Product">Producto</option>
+                                            <option value="@OrderType.Cash">Efectivo</option>
+                                        </InputSelect>
+                                        <ValidationMessage For="@(() => model.OrderType)" class="text-danger" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="form-group mb-3">
+                                        <label class="form-label">Productos</label>
+                                        @if (products != null && products.Any())
+                                        {
+                                            <div class="table-responsive">
+                                                <table class="table table-bordered">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Seleccionar</th>
+                                                            <th>Artículo</th>
+                                                            <th>Cantidad</th>
+                                                            <th>Precio</th>
+                                                            <th>Subtotal</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach (var product in products)
+                                                        {
+                                                            <tr>
+                                                                <td>
+                                                                    <div class="form-check">
+                                                                        <input type="checkbox" class="form-check-input" id="product-@product.Id"
+                                                                               @onchange="@((e) => ToggleProduct(product.Id, (bool)e.Value!))" />
+                                                                    </div>
+                                                                </td>
+                                                                <td>
+                                                                    <label class="form-check-label" for="product-@product.Id">
+                                                                        @product.Name
+                                                                    </label>
+                                                                </td>
+                                                                <td>
+                                                                    @if (selectedProductQuantities.ContainsKey(product.Id))
+                                                                    {
+                                                                        <input type="number" class="form-control" min="1" 
+                                                                               @bind="selectedProductQuantities[product.Id]"
+                                                                               @bind:event="oninput"
+                                                                               @bind:after="() => UpdateQuantity(product.Id)" />
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <span class="text-muted">-</span>
+                                                                    }
+                                                                </td>
+                                                                <td>@product.SalePrice.ToString("C", new System.Globalization.CultureInfo("es-AR"))</td>
+                                                                <td>
+                                                                    @if (selectedProductQuantities.ContainsKey(product.Id))
+                                                                    {
+                                                                        @((product.SalePrice * selectedProductQuantities[product.Id]).ToString("C", new System.Globalization.CultureInfo("es-AR")))
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <span class="text-muted">-</span>
+                                                                    }
+                                                                </td>
+                                                            </tr>
+                                                        }
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <p class="text-muted">No hay productos disponibles.</p>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="form-group d-flex gap-2">
+                                        <button type="submit" class="btn btn-primary" disabled="@(isLoading || isLoadingData)">
+                                            @if (isLoading)
+                                            {
+                                                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                            }
+                                            <i class="fas fa-save me-1"></i> Crear Orden
+                                        </button>
+                                        <button type="button" class="btn btn-secondary" @onclick="ResetForm" disabled="@(isLoading || isLoadingData)">
+                                            <i class="fas fa-undo me-1"></i> Resetear
+                                        </button>
+                                        <button type="button" class="btn btn-outline-secondary" @onclick="GoBack" disabled="@(isLoading || isLoadingData)">
+                                            <i class="fas fa-times me-1"></i> Cancelar
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </EditForm>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private CreateOrderRequest model = new();
+    private bool isLoading = false;
+    private bool isLoadingData = false;
+    private string errorMessage = string.Empty;
+    private string successMessage = string.Empty;
+
+    private List<CustomerDto>? customers;
+    private List<PeriodDto>? periods;
+    private List<BusinessTypeDto>? businessTypes;
+    private List<ProductDto>? products;
+    
+    // Dictionary to track selected products and their quantities
+    private Dictionary<int, int> selectedProductQuantities = new Dictionary<int, int>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        try
+        {
+            isLoadingData = true;
+            StateHasChanged();
+
+            // Load all required data concurrently
+            var customerTask = CustomerService.GetAllCustomersAsync();
+            var periodTask = LookupService.GetAllPeriodsAsync ();
+            var businessTypeTask = LookupService.GetAllBusinessTypesAsync();
+            var productTask = ProductService.GetAllAsync();
+
+            await Task.WhenAll(customerTask, periodTask, businessTypeTask, productTask);
+
+            var customerResponse = await customerTask;
+            var periodResponse = await periodTask;
+            var businessTypeResponse = await businessTypeTask;
+            var productResponse = await productTask;
+
+            customers = customerResponse?.ToList() ?? new List<CustomerDto>();
+            periods = periodResponse?.ToList() ?? new List<PeriodDto>();
+            businessTypes = businessTypeResponse?.ToList() ?? new List<BusinessTypeDto>();
+            products = productResponse?.Data?.Items.ToList() ?? new List<ProductDto>();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error al cargar los datos: {ex.Message}";
+            customers = new List<CustomerDto>();
+            periods = new List<PeriodDto>();
+            businessTypes = new List<BusinessTypeDto>();
+            products = new List<ProductDto>();
+        }
+        finally
+        {
+            isLoadingData = false;
+            StateHasChanged();
+        }
+    }
+
+    private void ToggleProduct(int productId, bool isSelected)
+    {
+        var product = products?.FirstOrDefault(p => p.Id == productId);
+        if (product == null) return;
+
+        if (isSelected)
+        {
+            if (!model.ProductIds.Contains(productId))
+            {
+                model.ProductIds.Add(productId);
+                selectedProductQuantities[productId] = 1; // Default quantity
+                
+                // Add to OrderProducts collection
+                model.OrderProducts.Add(new OrderProductDto
+                {
+                    ProductId = productId,
+                    Product = product,
+                    Quantity = 1
+                });
+            }
+        }
+        else
+        {
+            model.ProductIds.Remove(productId);
+            selectedProductQuantities.Remove(productId);
+            
+            // Remove from OrderProducts collection
+            var orderProductToRemove = model.OrderProducts.FirstOrDefault(op => op.ProductId == productId);
+            if (orderProductToRemove != null)
+            {
+                model.OrderProducts.Remove(orderProductToRemove);
+            }
+        }
+        
+        RecalculatePrices();
+        StateHasChanged();
+    }
+
+    private void UpdateQuantity(int productId)
+    {
+        if (!selectedProductQuantities.ContainsKey(productId)) return;
+
+        // Update the quantity in the OrderProducts collection
+        var orderProduct = model.OrderProducts.FirstOrDefault(op => op.ProductId == productId);
+        if (orderProduct != null)
+        {
+            orderProduct.Quantity = selectedProductQuantities[productId];
+        }
+
+        RecalculatePrices();
+        StateHasChanged();
+    }
+
+    private void RecalculatePrices()
+    {
+        decimal totalSellingPrice = 0m;
+        decimal totalCostPrice = 0m;
+
+        foreach (var kvp in selectedProductQuantities)
+        {
+            var product = products?.FirstOrDefault(p => p.Id == kvp.Key);
+            if (product != null && kvp.Value > 0)
+            {
+                var productSubtotal = product.SalePrice * kvp.Value;
+                var productCostSubtotal = product.CostPrice * kvp.Value;
+
+                totalSellingPrice += productSubtotal;
+                totalCostPrice += productCostSubtotal;
+            }
+        }
+
+        model.SellingPrice = totalSellingPrice;
+        model.CostPrice = totalCostPrice;
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        try
+        {
+            isLoading = true;
+            errorMessage = string.Empty;
+            successMessage = string.Empty;
+            StateHasChanged();
+
+            // Validate selections
+            if (model.CustomerId == Guid.Empty)
+            {
+                errorMessage = "Debe seleccionar un cliente.";
+                return;
+            }
+
+            if (model.PeriodId <= 0)
+            {
+                errorMessage = "Debe seleccionar un período.";
+                return;
+            }
+
+            if (model.BusinessTypeId <= 0)
+            {
+                errorMessage = "Debe seleccionar un tipo de negocio.";
+                return;
+            }
+
+            var result = await OrderService.CreateOrderAsync(model);
+
+            if (result != null)
+            {
+                successMessage = "Orden creada exitosamente";
+                await JSRuntime.InvokeVoidAsync("alert", "Orden creada exitosamente!");
+
+                // Wait a moment to show the success message, then navigate
+                await Task.Delay(1500);
+                Navigation.NavigateTo("/orders");
+            }
+            else
+            {
+                errorMessage = "Ocurrió un error creando la orden.";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Ocurrió un error inesperado: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task HandleInvalidSubmit()
+    {
+        errorMessage = "Corrija los errores de validación.";
+        await Task.CompletedTask;
+    }
+
+    private async Task ResetForm()
+    {
+        model = new CreateOrderRequest();
+        selectedProductQuantities.Clear();
+        errorMessage = string.Empty;
+        successMessage = string.Empty;
+        StateHasChanged();
+        await Task.CompletedTask;
+    }
+
+    private void GoBack()
+    {
+        Navigation.NavigateTo("/orders");
+    }
+}

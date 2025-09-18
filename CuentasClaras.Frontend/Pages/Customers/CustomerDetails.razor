@@ -1,0 +1,118 @@
+﻿@page "/customers/{Id:guid}"
+@using CuentasClaras.Application.DTOs
+@using CuentasClaras.Frontend.Services
+@inject ICustomerService CustomerService
+@inject NavigationManager Navigation
+
+<PageTitle>Detalles de Cliente</PageTitle>
+
+@if (loading)
+{
+    <div class="text-center">
+        <div class="spinner-border" role="status">
+            <span class="visually-hidden">Cargando...</span>
+        </div>
+    </div>
+}
+else if (customer != null)
+{
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3>Detalles de Cliente</h3>
+        <div>
+            <button class="btn btn-primary me-2" @onclick="() => NavigateToEdit()">
+                <i class="fas fa-edit"></i> Editar
+            </button>
+            <button class="btn btn-secondary" @onclick="GoBack">
+                <i class="fas fa-arrow-left"></i> Volver a la lista
+            </button>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">@($"{customer.Name} {customer.LastName}")</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <dl class="row">
+                                <dt class="col-sm-4">DNI:</dt>
+                                <dd class="col-sm-8">@customer.DNI</dd>
+
+                                <dt class="col-sm-4">Nombre:</dt>
+                                <dd class="col-sm-8">@customer.Name</dd>
+
+                                <dt class="col-sm-4">Apellido:</dt>
+                                <dd class="col-sm-8">@customer.LastName</dd>
+
+                                <dt class="col-sm-4">Email:</dt>
+                                <dd class="col-sm-8">@customer.Email</dd>
+                            </dl>
+                        </div>
+                        <div class="col-md-6">
+                            <dl class="row">
+                                <dt class="col-sm-4">Teléfono 1:</dt>
+                                <dd class="col-sm-8">@customer.Phone1</dd>
+
+                                <dt class="col-sm-4">Teléfono 2:</dt>
+                                <dd class="col-sm-8">@customer.Phone2</dd>
+
+                                <dt class="col-sm-4">Teléfono 3:</dt>
+                                <dd class="col-sm-8">@customer.Phone3</dd>
+                            </dl>
+                        </div>
+                    </div>
+
+                    <hr />
+
+                    <h6>Dirección</h6>
+                    <dl class="row">
+                        <dt class="col-sm-2">Dirección 1:</dt>
+                        <dd class="col-sm-4">@customer.Address1</dd>
+
+                        <dt class="col-sm-2">Dirección 2:</dt>
+                        <dd class="col-sm-4">@customer.Address2</dd>
+
+                        <dt class="col-sm-2">Localidad:</dt>
+                        <dd class="col-sm-4">@customer.Locality?.Name</dd>
+                    </dl>
+
+                    <hr />
+
+                    <h6>Información del Negocio</h6>
+                    <dl class="row">
+                        <dt class="col-sm-2">Cobrador:</dt>
+                        <dd class="col-sm-4">@customer.Collector?.Name</dd>
+
+                        <dt class="col-sm-2">Vendedor:</dt>
+                        <dd class="col-sm-4">@customer.Salesman?.Name</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="alert alert-danger">
+        <i class="fas fa-exclamation-triangle"></i> Cliente no encotrado.
+    </div>
+}
+
+@code {
+    [Parameter] public Guid Id { get; set; }
+
+    private CustomerDto? customer;
+    private bool loading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        customer = await CustomerService.GetCustomerByIdAsync(Id);
+        loading = false;
+    }
+
+    private void NavigateToEdit() => Navigation.NavigateTo($"/customers/edit/{Id}");
+    private void GoBack() => Navigation.NavigateTo("/customers");
+}

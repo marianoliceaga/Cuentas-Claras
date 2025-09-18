@@ -1,0 +1,238 @@
+﻿@page "/products/edit/{id:int}"
+@using CuentasClaras.Application.DTOs
+@using CuentasClaras.Frontend.Services
+@using System.Text.Json.Nodes
+@using System.Text.Json
+@inject IProductService ProductService
+@inject NavigationManager Navigation
+@inject IJSRuntime JSRuntime
+
+<PageTitle>Editar Artículo</PageTitle>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            @if (loading)
+            {
+                <div class="text-center">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Cargando...</span>
+                    </div>
+                </div>
+            }
+            else if (productFound)
+            {
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Editar Artículo</h3>
+                    </div>
+                    <div class="card-body">
+                        <EditForm Model="updateProductDto" OnValidSubmit="HandleValidSubmit">
+                            <DataAnnotationsValidator />
+                            <ValidationSummary class="alert alert-danger" />
+
+                            <div class="mb-3">
+                                <label for="name" class="form-label">Nombre *</label>
+                                <InputText id="name" class="form-control" @bind-Value="updateProductDto.Name" />
+                                <ValidationMessage For="@(() => updateProductDto.Name)" />
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="description" class="form-label">Descripción</label>
+                                <InputTextArea id="description" class="form-control" rows="3" @bind-Value="updateProductDto.Description" />
+                                <ValidationMessage For="@(() => updateProductDto.Description)" />
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <JsonEditor Node="Root" OnChanged="UpdateJson" />
+                                    {
+                                        <h4>Resultante</h4>
+                                        <pre>@JsonOutput</pre>
+                                    }
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="subcategory" class="form-label">Subcategoría *</label>
+                                        <InputSelect id="subcategory" class="form-select" @bind-Value="updateProductDto.SubcategoryId">
+                                            <option value="">Elige una subcategoría</option>
+                                            @if (subcategories?.Any() == true)
+                                            {
+                                                @foreach (var subcategory in subcategories)
+                                                {
+                                                    <option value="@subcategory.Id">@subcategory.Name</option>
+                                                }
+                                            }
+                                        </InputSelect>
+                                        <ValidationMessage For="@(() => updateProductDto.SubcategoryId)" />
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="price" class="form-label">Precio de Venta</label>
+                                        <InputNumber id="price" class="form-control" @bind-Value="updateProductDto.SalePrice" step="1.0" />
+                                        <ValidationMessage For="@(() => updateProductDto.SalePrice)" />
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="price" class="form-label">Precio de Costo</label>
+                                        <InputNumber id="price" class="form-control" @bind-Value="updateProductDto.CostPrice" step="1.0" />
+                                        <ValidationMessage For="@(() => updateProductDto.CostPrice)" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <InputFile OnChange="HandleImageUpload" accept="image/*" />
+                                @if (previewUrl != null)
+                                {
+                                    <img src="@previewUrl" style="max-width:300px; margin-top:10px;" />
+                                }
+                            </div>>
+
+                            <div class="mb-3">
+                                <label for="providerUrl" class="form-label">URL Proveedor</label>
+                                <InputTextArea id="providerUrl" class="form-control" rows="3" @bind-Value="updateProductDto.ProviderUrl" />
+                                <ValidationMessage For="@(() => updateProductDto.ProviderUrl)" />
+                            </div>
+
+                            <div class="d-flex justify-content-between">
+                                <NavLink type="button" class="btn btn-secondary" href="@($"/products")">
+                                    <i class="fas fa-arrow-left"></i> Vuelta a Artículos
+                                </NavLink>
+                                <button type="submit" class="btn btn-primary" disabled="@submitting">
+                                    @if (submitting)
+                                    {
+                                        <span class="spinner-border spinner-border-sm me-2"></span>
+                                    }
+                                    <i class="fas fa-save"></i> Actualizar Artículo
+                                </button>
+                            </div>
+                        </EditForm>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle"></i> Articulo no encontrado.
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public int Id { get; set; }
+
+    private UpdateProductDto updateProductDto = new();
+    private List<SubcategoryDto> subcategories = new();
+    private bool loading = true;
+    private bool submitting = false;
+    private bool productFound = false;
+
+    private JsonNode Root = JsonNode.Parse(@"{
+    ""Caracteristicas"": {
+    ""Nombre"": ""Heladera"",
+    ""Marca"": ""Philips"",
+    ""Modelo"": ""X200"",
+    ""Color"": ""Blanco"",
+    ""Garantia"": ""12 meses"",
+    ""ConsumoEnergetico"": ""A+"",
+    ""Potencia"": ""150W"",
+    ""Dimensiones"": {
+      ""Alto"": ""170 cm"",
+      ""Ancho"": ""70 cm"",
+      ""Profundidad"": ""65 cm""
+    },
+    ""Peso"": ""60 kg""
+      },
+      ""EnStock"": ""Si"",
+      ""Transportable"": ""Si"",
+      ""AccesoriosIncluidos"": [ ""Manual"", ""Cable de alimentación"", ""Kit de instalación"" ]
+    }")!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadSubcategories();
+        await LoadProduct();
+    }
+
+    private async Task LoadSubcategories()
+    {
+        var result = await ProductService.GetSubcategoriesAsync();
+        if (result?.Success == true && result.Data != null)
+        {
+            subcategories = result.Data;
+        }
+    }
+
+    private async Task LoadProduct()
+    {
+        var result = await ProductService.GetByIdAsync(Id);
+
+        if (result?.Success == true && result.Data != null)
+        {
+            updateProductDto.Name = result.Data.Name;
+            updateProductDto.Description = result.Data.Description;
+            updateProductDto.SubcategoryId = result.Data.SubcategoryId;
+            updateProductDto.CostPrice = result.Data.CostPrice;
+            updateProductDto.SalePrice = result.Data.SalePrice;
+            updateProductDto.Characteristics = result.Data.Characteristics;
+            updateProductDto.Image = result.Data.Image;
+            updateProductDto.ProviderUrl = result.Data.ProviderUrl;
+            productFound = true;
+        }
+
+        loading = false;
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        submitting = true;
+        var result = await ProductService.UpdateAsync(Id, updateProductDto);
+
+        if (result?.Success == true)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", "Artículo actualizado exitosamente!");
+            Navigation.NavigateTo("/products");
+        }
+        else
+        {
+            await JSRuntime.InvokeVoidAsync("alert", $"Error actualizando artículo: {result?.Message}");
+        }
+
+        submitting = false;
+    }
+
+    private string JsonOutput = string.Empty;
+
+    private void UpdateJson()
+    {
+        JsonOutput = Root.ToJsonString(new JsonSerializerOptions { WriteIndented = true });
+        updateProductDto.Characteristics = JsonOutput;
+    }
+
+    private void Save() => UpdateJson();
+
+    private string? previewUrl;
+    private async Task HandleImageUpload(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+
+        // Resize image if needed
+        var resizedImageFile = await file.RequestImageFileAsync(file.ContentType, 400, 400);
+
+        using var stream = resizedImageFile.OpenReadStream(maxAllowedSize: 10_000_000); // limit 10 MB
+        using var ms = new MemoryStream();
+        await stream.CopyToAsync(ms);
+
+        var bytes = ms.ToArray();
+        previewUrl = $"data:{file.ContentType};base64,{Convert.ToBase64String(bytes)}";
+        updateProductDto.Image = bytes;
+    }
+}

@@ -1,0 +1,227 @@
+﻿@page "/products"
+@using CuentasClaras.Application.DTOs
+@using CuentasClaras.Frontend.Services
+@inject IProductService ProductService
+@inject NavigationManager Navigation
+@inject IJSRuntime JSRuntime
+
+<PageTitle>Administración de Artículos</PageTitle>
+
+<div class="container-fluid">
+    <div class="row mb-3">
+        <div class="col">
+            <h1>Administración de Artículos</h1>
+        </div>
+        <div class="col-auto">
+            <NavLink class="btn btn-primary" href="/products/create">
+                <i class="fas fa-plus"></i> Crear Nuevo Artículo
+            </NavLink>
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <div class="input-group">
+                <input type="text" class="form-control" placeholder="Buscar Artículos..." @bind="searchTerm" @onkeypress="OnSearchKeyPress" />
+                <button class="btn btn-outline-secondary" type="button" @onclick="SearchProducts">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <select class="form-select" @bind="selectedSubcategoryId" @bind:event="oninput" @onchange="OnSubcategoryChange">
+                <option value="">Todas las Subcategorías</option>
+                @if (subcategories?.Any() == true)
+                {
+                    @foreach (var subcategory in subcategories)
+                    {
+                        <option value="@subcategory.Id">@subcategory.Name</option>
+                    }
+                }
+                <!--TODO (@subcategory.Category.Name)-->
+            </select>
+        </div>
+    </div>
+
+    @if (loading)
+    {
+        <div class="text-center">
+            <div class="spinner-border" role="status">
+                <span class="visually-hidden">Cargando...</span>
+            </div>
+        </div>
+    }
+    else if (products?.Any() == true)
+    {
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Descripción</th>
+                                <th>Subcategoria</th>
+                                <th>Precio de Costo</th>
+                                <th>Precio de Venta</th>
+                                <th>Imagen</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var product in products)
+                            {
+                                <tr>
+                                    <td>@product.Id</td>
+                                    <td>@product.Name</td>
+                                    <td>@product.Subcategory?.Name</td>
+                                    <td>$@product.CostPrice.ToString("F2")</td>
+                                    <td>$@product.SalePrice.ToString("F2")</td>
+                                    <td>
+                                        @if (product.Image != null && product.Image.Length > 0)
+                                        {
+                                            <img src="data:image/*;base64,@Convert.ToBase64String(product.Image)"
+                                                 style="max-width:120px; max-height:120px;" />
+                                        }
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <NavLink class="btn btn-sm btn-info" href="@($"/products/{product.Id}")">
+                                                <i class="fas fa-plus"></i> Ver
+                                            </NavLink>
+
+                                            <NavLink class="btn btn-sm btn-warning" href="@($"/products/edit/{product.Id}")">
+                                                <i class="fas fa-edit"></i> Editar
+                                            </NavLink>
+                                            <button class="btn btn-sm btn-danger" @onclick="() => DeleteProduct(product.Id)">
+                                                <i class="fas fa-trash"></i> Eliminar
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                @* Pagination *@
+                @if (totalPages > 1)
+                {
+                    <nav aria-label="Products pagination">
+                        <ul class="pagination justify-content-center">
+                            <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                                <button class="page-link" @onclick="() => LoadPage(currentPage - 1)" disabled="@(currentPage == 1)">Anterior</button>
+                            </li>
+                            @for (int i = 1; i <= totalPages; i++)
+                            {
+                                int pagination = i;
+                                <li class="page-item @(currentPage == pagination ? "active" : "")">
+                                    <button class="page-link" @onclick="() => LoadPage(pagination)">@pagination</button>
+                                </li>
+                            }
+                            <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                                <button class="page-link" @onclick="() => LoadPage(currentPage + 1)" disabled="@(currentPage == totalPages)">Siguiente</button>
+                            </li>
+                        </ul>
+                    </nav>
+                }
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle"></i> No se encontraron productos.
+        </div>
+    }
+</div>
+
+@code {
+    private List<ProductDto> products = new();
+    private List<SubcategoryDto> subcategories = new();
+    private bool loading = true;
+    private string searchTerm = "";
+    private string selectedSubcategoryId = "";
+    private int currentPage = 1;
+    private int pageSize = 10;
+    private int totalPages = 1;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadSubcategories();
+        await LoadProducts();
+    }
+
+    private async Task LoadSubcategories()
+    {
+        var result = await ProductService.GetSubcategoriesAsync();
+        if (result?.Success == true && result.Data != null)
+        {
+            subcategories = result.Data;
+        }
+    }
+
+    private async Task LoadProducts()
+    {
+        loading = true;
+        int? subcategoryId = string.IsNullOrEmpty(selectedSubcategoryId) ? null : int.Parse(selectedSubcategoryId);
+        var result = await ProductService.GetAllAsync(currentPage, pageSize, searchTerm, subcategoryId);
+        
+        if (result?.Success == true && result.Data != null)
+        {
+            products = result.Data.Items;
+            totalPages = result.Data.TotalPages;
+        }
+        else
+        {
+            products = new List<ProductDto>();
+        }
+        
+        loading = false;
+    }
+
+    private async Task LoadPage(int page)
+    {
+        currentPage = page;
+        await LoadProducts();
+    }
+
+    private async Task SearchProducts()
+    {
+        currentPage = 1;
+        await LoadProducts();
+    }
+
+    private async Task OnSubcategoryChange(ChangeEventArgs e)
+    {
+        selectedSubcategoryId = e.Value?.ToString() ?? "";
+        currentPage = 1;
+        await LoadProducts();
+    }
+
+    private async Task OnSearchKeyPress(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await SearchProducts();
+        }
+    }
+
+    private async Task DeleteProduct(int id)
+    {
+        if (await JSRuntime.InvokeAsync<bool>("confirm", "¿Está seguro de que desea eliminar este producto?"))
+        {
+            var result = await ProductService.DeleteAsync(id);
+            if (result?.Success == true)
+            {
+                await LoadProducts();
+                await JSRuntime.InvokeVoidAsync("alert", "¡Producto eliminado con éxito!");
+            }
+            else
+            {
+                await JSRuntime.InvokeVoidAsync("alert", $"Error al eliminar el producto: {result?.Message}");
+            }
+        }
+    }
+}
